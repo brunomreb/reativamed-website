@@ -52,31 +52,28 @@ p{font-size:17px;font-weight:300;line-height:1.7;color:#4a6572}
 /* ══════════════════════════════
    NAVBAR
 ══════════════════════════════ */
-#nav{position:fixed;top:0;left:0;right:0;z-index:200;transition:background .3s,border-color .3s,backdrop-filter .3s}
-#nav.dark{background:transparent}
-#nav.light{background:#fff;border-bottom:1px solid #e2e8f0}
-.nav-c{display:flex;align-items:center;justify-content:space-between;height:64px}
+#nav{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:1000;width:fit-content;max-width:900px;border-radius:50px;padding:10px 24px;transition:background .3s,border-color .3s,backdrop-filter .3s}
+#nav .c{padding:0;max-width:none}
+#nav:not(.scrolled){background:rgba(6,11,18,0.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12)}
+#nav.scrolled{background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(57,153,169,0.2)}
+.nav-c{display:flex;align-items:center;justify-content:space-between;gap:32px}
 /* logo */
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-txt{font-size:19px;font-weight:700;line-height:1;letter-spacing:-.03em}
-.logo-txt .r{color:#0a0f14}.logo-txt .m{color:#3999a9}
-#nav.dark .logo-txt .r{color:#fff}
-#nav.dark .logo-reativa{fill:#fff}
+#nav .logo img{height:44px}
 /* nav links */
 .nav-links{display:flex;align-items:center;gap:28px}
-.nav-links a{font-size:14px;color:#4a6572;transition:color .18s}
-.nav-links a:hover{color:#0a0f14}
-#nav.dark .nav-links a{color:rgba(255,255,255,.6)}
-#nav.dark .nav-links a:hover{color:#fff}
+.nav-links a{font-size:14px;color:rgba(255,255,255,.7);transition:color .18s}
+.nav-links a:hover{color:#fff}
+#nav.scrolled .nav-links a{color:#4a6572}
+#nav.scrolled .nav-links a:hover{color:#0a0f14}
 /* nav btn */
-.nav-btn-dark{border:1.5px solid rgba(255,255,255,.35);color:#fff;background:transparent;padding:9px 22px;border-radius:6px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:border-color .2s}
-.nav-btn-dark:hover{border-color:#fff}
-.nav-btn-light{border:1.5px solid #3999a9;color:#3999a9;background:transparent;padding:9px 22px;border-radius:6px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
-.nav-btn-light:hover{background:#3999a9;color:#fff}
+#nav-cta{border:1px solid rgba(255,255,255,.3);color:#fff;background:transparent;padding:9px 22px;border-radius:50px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:border-color .2s,color .2s,background .2s;white-space:nowrap;display:inline-block}
+#nav-cta:hover{border-color:#fff}
+#nav.scrolled #nav-cta{border-color:#3999a9;color:#3999a9}
+#nav.scrolled #nav-cta:hover{background:#3999a9;color:#fff}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
-.hamburger span{display:block;width:22px;height:2px;border-radius:2px;transition:transform .26s,opacity .26s}
-#nav.dark .hamburger span{background:#fff}
-#nav.light .hamburger span{background:#0a0f14}
+.hamburger span{display:block;width:22px;height:2px;border-radius:2px;transition:transform .26s,opacity .26s;background:#fff}
+#nav.scrolled .hamburger span{background:#0a0f14}
 .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
 .hamburger.open span:nth-child(2){opacity:0}
 .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
@@ -92,7 +89,7 @@ p{font-size:17px;font-weight:300;line-height:1.7;color:#4a6572}
 /* ══════════════════════════════
    HERO
 ══════════════════════════════ */
-#hero{min-height:100svh;background:#060b12;display:flex;align-items:center;padding:80px 0;position:relative;overflow:hidden}
+#hero{min-height:100svh;background:#060b12;display:flex;align-items:center;padding:100px 0 80px;position:relative;overflow:hidden}
 .hero-bg-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 85% 10%,rgba(57,153,169,.18) 0%,transparent 60%);pointer-events:none}
 .hero-bg-dots{position:absolute;inset:0;pointer-events:none;
   background-image:radial-gradient(circle,rgba(255,255,255,.045) 1px,transparent 1px);
@@ -361,11 +358,11 @@ footer{padding:36px 0;background:#060b12;border-top:1px solid rgba(255,255,255,.
 <!-- ══════════════════════════════
      NAVBAR
 ══════════════════════════════ -->
-<nav id="nav" class="dark">
+<nav id="nav">
   <div class="c">
     <div class="nav-c">
       <a href="#" class="logo">
-        <img src="logo.svg" alt="ReativaMED" height="32" style="display:block;">
+        <img src="logo.svg" alt="ReativaMED" height="32" id="navbar-logo" style="display:block;">
       </a>
       <div class="nav-links">
         <a href="#calc">Calculadora</a>
@@ -374,7 +371,7 @@ footer{padding:36px 0;background:#060b12;border-top:1px solid rgba(255,255,255,.
         <a href="#form">Contacto</a>
       </div>
       <div class="nav-desktop-btn">
-        <a href="https://app.reativamed.pt" id="nav-cta" class="nav-btn-dark">Entrar</a>
+        <a href="https://app.reativamed.pt" id="nav-cta">Entrar</a>
       </div>
       <button class="hamburger" id="ham" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
@@ -826,14 +823,16 @@ footer{padding:36px 0;background:#060b12;border-top:1px solid rgba(255,255,255,.
 <script>
 // ── NAVBAR ──────────────────────────────────────────────────
 const nav = document.getElementById('nav');
-const navCta = document.getElementById('nav-cta');
+const navLogo = document.getElementById('navbar-logo');
 const heroEnd = document.getElementById('hero-end');
 
 const navObs = new IntersectionObserver(([e]) => {
-  const onHero = e.isIntersecting;
-  nav.className = onHero ? 'dark' : 'light';
-  if (navCta) {
-    navCta.className = onHero ? 'nav-btn-dark' : 'nav-btn-light';
+  if (e.isIntersecting) {
+    nav.classList.remove('scrolled');
+    if (navLogo) navLogo.src = 'logo.svg';
+  } else {
+    nav.classList.add('scrolled');
+    if (navLogo) navLogo.src = 'logoescuro.svg';
   }
 }, {threshold: 0});
 navObs.observe(heroEnd);
