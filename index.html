@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReativaMED — Recupera Pacientes Inativos Automaticamente</title>
+  <meta name="description" content="Sistema de reactivação de pacientes para clínicas de estética. IA via WhatsApp que recupera consultas perdidas automaticamente.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ─── RESET ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #060b12;
+      color: #ffffff;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* ─── LAYOUT ─── */
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 96px 0; }
+
+    /* ─── TYPOGRAPHY ─── */
+    .section-label {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #3999a9;
+      margin-bottom: 16px;
+    }
+    h1, h2, h3 { letter-spacing: -0.02em; line-height: 1.1; font-weight: 700; }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: #3999a9; color: #ffffff; }
+    .btn-primary:hover { background: #2d7d8a; }
+    .btn-ghost {
+      background: transparent;
+      color: #ffffff;
+      border: 1.5px solid rgba(255,255,255,0.25);
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.04); }
+    .btn-sm { padding: 9px 20px; font-size: 14px; }
+
+    /* ─── ANIMATIONS ─── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .fade-up.in { opacity: 1; transform: translateY(0); }
+    .fade-up.d1 { transition-delay: 0.08s; }
+    .fade-up.d2 { transition-delay: 0.16s; }
+    .fade-up.d3 { transition-delay: 0.24s; }
+    .fade-up.d4 { transition-delay: 0.32s; }
+
+    /* ─── LOGO ─── */
+    .logo-mark { display: flex; flex-direction: column; }
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: #ffffff;
+    }
+    .logo-text .teal { color: #3999a9; }
+    .logo-tag {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.38);
+      margin-top: 3px;
+    }
+
+    /* ═══════════════════════════════════════
+       NAVBAR
+    ═══════════════════════════════════════ */
+    #navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0;
+      transition: background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease;
+    }
+    #navbar.scrolled {
+      background: rgba(6,11,18,0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.07);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .hamburger span {
+      display: block;
+      width: 22px; height: 2px;
+      background: white;
+      border-radius: 2px;
+      transition: transform 0.28s, opacity 0.28s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(6,11,18,0.97);
+      z-index: 99;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-size: 26px;
+      font-weight: 600;
+      color: white;
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .mobile-menu a:hover { color: #3999a9; }
+
+    /* ═══════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════ */
+    #hero {
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      background: #060b12;
+      position: relative;
+      overflow: hidden;
+      padding: 128px 0 96px;
+    }
+    .hero-glow {
+      position: absolute;
+      top: -240px; right: -240px;
+      width: 900px; height: 900px;
+      background: radial-gradient(circle at center, rgba(57,153,169,0.11) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .hero-glow-bottom {
+      position: absolute;
+      bottom: -200px; left: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle at center, rgba(57,153,169,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(57,153,169,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57,153,169,0.035) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+      -webkit-mask-image: radial-gradient(ellipse 80% 90% at 55% 0%, black 0%, transparent 70%);
+      mask-image: radial-gradient(ellipse 80% 90% at 55% 0%, black 0%, transparent 70%);
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 780px; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 16px;
+      border-radius: 100px;
+      background: rgba(57,153,169,0.09);
+      border: 1px solid rgba(57,153,169,0.28);
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #6ee7f7;
+      margin-bottom: 32px;
+      letter-spacing: 0.01em;
+    }
+    .badge-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #3999a9;
+      box-shadow: 0 0 10px rgba(57,153,169,0.9);
+      animation: blink 2.2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(57,153,169,0.9); }
+      50% { opacity: 0.35; box-shadow: 0 0 4px rgba(57,153,169,0.3); }
+    }
+    .hero-h1 {
+      font-size: clamp(36px, 5.8vw, 68px);
+      font-weight: 700;
+      line-height: 1.06;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      margin-bottom: 24px;
+    }
+    .hero-h1 em { font-style: normal; color: #3999a9; }
+    .hero-sub {
+      font-size: clamp(17px, 2.1vw, 21px);
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+      margin-bottom: 44px;
+      max-width: 580px;
+    }
+    .hero-ctas {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 44px;
+    }
+    .hero-trust {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .trust-item {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .trust-item::before {
+      content: '✓';
+      color: #3999a9;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    /* ═══════════════════════════════════════
+       CALCULATOR
+    ═══════════════════════════════════════ */
+    #calculator { background: #f8fafb; }
+    .calc-headline {
+      font-size: clamp(28px, 3.8vw, 44px);
+      color: #0f172a;
+      margin-bottom: 12px;
+    }
+    .calc-intro {
+      font-size: 17px;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 56px;
+      max-width: 560px;
+    }
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: start;
+    }
+    .calc-inputs { display: flex; flex-direction: column; gap: 30px; }
+    .calc-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #0f172a;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .calc-hint {
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-top: 7px;
+    }
+    .range-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .range-val {
+      font-size: 15px;
+      font-weight: 600;
+      color: #3999a9;
+      min-width: 40px;
+      text-align: right;
+    }
+    input[type="range"] {
+      flex: 1;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #e2e8f0;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #3999a9;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(57,153,169,0.45);
+      transition: transform 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #3999a9;
+      border: none;
+      cursor: pointer;
+    }
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #cbd5e1;
+      margin-top: 6px;
+    }
+    .num-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-family: inherit;
+      font-size: 15px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      color: #0f172a;
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .num-input:focus { border-color: #3999a9; box-shadow: 0 0 0 3px rgba(57,153,169,0.1); }
+    .num-input:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+    .lock-badge {
+      font-size: 11px;
+      background: #e2e8f0;
+      color: #64748b;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-weight: 500;
+    }
+    .calc-result-box {
+      background: #060b12;
+      border-radius: 20px;
+      padding: 44px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(57,153,169,0.18);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+    }
+    .calc-result-box::before {
+      content: '';
+      position: absolute;
+      top: -120px; right: -120px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(57,153,169,0.14) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .result-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 10px;
+    }
+    .result-value {
+      font-size: clamp(44px, 6.5vw, 68px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: #3999a9;
+      line-height: 1;
+      margin-bottom: 18px;
+      transition: color 0.3s;
+    }
+    .result-desc {
+      font-size: 15px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.65;
+      margin-bottom: 36px;
+    }
+    .result-desc strong { color: rgba(255,255,255,0.85); }
+    .result-note {
+      font-size: 11px;
+      color: rgba(255,255,255,0.22);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 16px;
+      margin-top: 8px;
+    }
+
+    /* ═══════════════════════════════════════
+       PROBLEM
+    ═══════════════════════════════════════ */
+    #problem { background: #ffffff; }
+    .problem-headline {
+      font-size: clamp(28px, 3.8vw, 44px);
+      color: #0f172a;
+      margin-bottom: 14px;
+    }
+    .problem-sub {
+      font-size: 17px;
+      color: #64748b;
+      line-height: 1.6;
+      max-width: 520px;
+      margin-bottom: 60px;
+    }
+    .problem-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .problem-card {
+      padding: 32px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      background: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 6px 20px rgba(0,0,0,0.04);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .problem-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.09), 0 16px 40px rgba(0,0,0,0.06);
+    }
+    .p-icon {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      background: rgba(57,153,169,0.09);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+    .problem-card h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+      margin-bottom: 10px;
+    }
+    .problem-card p {
+      font-size: 14.5px;
+      color: #64748b;
+      line-height: 1.65;
+    }
+
+    /* ═══════════════════════════════════════
+       SOLUTION
+    ═══════════════════════════════════════ */
+    #solution { background: #f8fafb; }
+    .solution-headline {
+      font-size: clamp(28px, 3.8vw, 44px);
+      color: #0f172a;
+      text-align: center;
+      margin-bottom: 72px;
+    }
+    .motor-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: center;
+      margin-bottom: 96px;
+    }
+    .motor-row:last-child { margin-bottom: 0; }
+    .motor-row.flipped .motor-visual { order: -1; }
+    .motor-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #3999a9;
+      background: rgba(57,153,169,0.09);
+      border: 1px solid rgba(57,153,169,0.2);
+      padding: 5px 13px;
+      border-radius: 100px;
+      margin-bottom: 18px;
+    }
+    .motor-title {
+      font-size: clamp(26px, 3.2vw, 38px);
+      color: #0f172a;
+      margin-bottom: 16px;
+    }
+    .motor-desc {
+      font-size: 16px;
+      color: #64748b;
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+    .motor-bullets { list-style: none; display: flex; flex-direction: column; gap: 11px; }
+    .motor-bullets li {
+      font-size: 14.5px;
+      color: #334155;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .motor-bullets li::before {
+      content: '✓';
+      color: #3999a9;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* WhatsApp mockup */
+    .wa-mockup {
+      background: #0b1017;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.42), 0 0 0 1px rgba(255,255,255,0.05);
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .wa-head {
+      background: #1a2535;
+      padding: 13px 16px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+    .wa-av {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3999a9, #2d7d8a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+    .wa-head-text p { font-size: 13px; font-weight: 600; color: white; line-height: 1.3; }
+    .wa-head-text span { font-size: 11px; color: rgba(255,255,255,0.4); }
+    .wa-body {
+      padding: 14px 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      min-height: 300px;
+      background: #0b1017;
+    }
+    .wa-date-sep {
+      text-align: center;
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.22);
+      margin: 4px 0;
+    }
+    .bubble {
+      max-width: 82%;
+      padding: 9px 12px 7px;
+      font-size: 13px;
+      line-height: 1.5;
+      position: relative;
+    }
+    .bubble-in {
+      background: #1e2a36;
+      color: rgba(255,255,255,0.82);
+      border-radius: 4px 14px 14px 14px;
+      align-self: flex-start;
+    }
+    .bubble-out {
+      background: #1b4d5c;
+      color: rgba(255,255,255,0.9);
+      border-radius: 14px 4px 14px 14px;
+      align-self: flex-end;
+    }
+    .bubble-time {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      text-align: right;
+      margin-top: 3px;
+    }
+    .bubble-time.out { color: rgba(155,220,230,0.45); }
+
+    /* Dashboard mockup */
+    .dash-mockup {
+      background: #070d15;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.42), 0 0 0 1px rgba(255,255,255,0.06);
+      padding: 26px;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+    .dash-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .dash-title-sm {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .dash-dot { width: 7px; height: 7px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px #34d399; }
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .dash-card {
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 16px 14px;
+    }
+    .dash-num {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+    .dash-num.teal { color: #3999a9; }
+    .dash-num.green { color: #34d399; }
+    .dash-num.amber { color: #fbbf24; }
+    .dash-num.white { color: #ffffff; }
+    .dash-lbl { font-size: 11px; color: rgba(255,255,255,0.38); line-height: 1.4; }
+    .dash-chart-area {
+      background: rgba(255,255,255,0.025);
+      border-radius: 8px;
+      padding: 14px 12px 10px;
+    }
+    .dash-chart-label {
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 10px;
+    }
+    .dash-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 52px;
+    }
+    .bar {
+      flex: 1;
+      border-radius: 3px 3px 0 0;
+      background: rgba(57,153,169,0.3);
+      min-height: 6px;
+      transition: background 0.2s;
+    }
+    .bar.active { background: #3999a9; }
+
+    /* ═══════════════════════════════════════
+       STEPS
+    ═══════════════════════════════════════ */
+    #steps { background: #ffffff; }
+    .steps-headline {
+      font-size: clamp(28px, 3.8vw, 44px);
+      color: #0f172a;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .steps-sub {
+      font-size: 17px;
+      color: #64748b;
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 72px;
+    }
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      position: relative;
+      gap: 8px;
+    }
+    .steps-line {
+      position: absolute;
+      top: 30px;
+      left: calc(16.6% + 8px);
+      right: calc(16.6% + 8px);
+      height: 1px;
+      background: linear-gradient(90deg, #3999a9 0%, rgba(57,153,169,0.15) 50%, #3999a9 100%);
+      z-index: 0;
+    }
+    .step-item {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 0 28px;
+    }
+    .step-num {
+      font-size: 52px;
+      font-weight: 700;
+      color: #3999a9;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 20px;
+      display: inline-block;
+      background: #ffffff;
+      padding: 0 10px;
+    }
+    .step-item h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+    .step-item p {
+      font-size: 14.5px;
+      color: #64748b;
+      line-height: 1.65;
+    }
+
+    /* ═══════════════════════════════════════
+       METRICS
+    ═══════════════════════════════════════ */
+    #metrics {
+      background: #060b12;
+      position: relative;
+      overflow: hidden;
+    }
+    #metrics::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px; height: 400px;
+      background: radial-gradient(ellipse, rgba(57,153,169,0.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .metrics-headline {
+      font-size: clamp(28px, 3.8vw, 44px);
+      color: white;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .metrics-sub {
+      font-size: 17px;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      position: relative;
+    }
+    .metric-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-top: 2.5px solid #3999a9;
+      border-radius: 14px;
+      padding: 36px 24px;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .metric-card:hover { background: rgba(255,255,255,0.04); }
+    .metric-num {
+      font-size: clamp(38px, 4vw, 54px);
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .metric-desc {
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════
+       GUARANTEE
+    ═══════════════════════════════════════ */
+    #guarantee {
+      background: #060b12;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #guarantee::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse, rgba(57,153,169,0.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .guarantee-icon { font-size: 52px; display: block; margin-bottom: 28px; }
+    .guarantee-h2 {
+      font-size: clamp(34px, 5vw, 58px);
+      color: white;
+      margin-bottom: 22px;
+      max-width: 760px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .guarantee-body {
+      font-size: 19px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.65;
+      max-width: 620px;
+      margin: 0 auto 18px;
+    }
+    .guarantee-note {
+      font-size: 14px;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 52px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ═══════════════════════════════════════
+       CONTACT FORM
+    ═══════════════════════════════════════ */
+    #contact {
+      background: #060b12;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .form-wrap {
+      max-width: 540px;
+      margin: 0 auto;
+    }
+    .form-headline {
+      font-size: clamp(28px, 3.8vw, 44px);
+      color: white;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .form-sub {
+      font-size: 16px;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      margin-bottom: 52px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .f-field { display: flex; flex-direction: column; gap: 7px; }
+    .f-field.full { grid-column: 1 / -1; }
+    .f-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+    }
+    .f-input {
+      width: 100%;
+      padding: 13px 16px;
+      font-family: inherit;
+      font-size: 15px;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.09);
+      border-radius: 8px;
+      color: white;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .f-input::placeholder { color: rgba(255,255,255,0.2); }
+    .f-input:focus {
+      border-color: #3999a9;
+      background: rgba(57,153,169,0.05);
+      box-shadow: 0 0 0 3px rgba(57,153,169,0.1);
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      background: #3999a9;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-submit:hover { background: #2d7d8a; }
+    .btn-submit:active { transform: scale(0.99); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .form-divider {
+      text-align: center;
+      font-size: 13px;
+      color: rgba(255,255,255,0.25);
+      margin: 22px 0;
+      position: relative;
+    }
+    .form-divider::before, .form-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 38%;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    .form-divider::before { left: 0; }
+    .form-divider::after { right: 0; }
+    .btn-wa {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px;
+      background: #25d366;
+      color: white;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-wa:hover { background: #1fb855; }
+    .privacy-note {
+      font-size: 12px;
+      color: rgba(255,255,255,0.22);
+      text-align: center;
+      margin-top: 22px;
+      line-height: 1.65;
+    }
+    .success-box {
+      display: none;
+      text-align: center;
+      padding: 56px 32px;
+      background: rgba(57,153,169,0.07);
+      border: 1px solid rgba(57,153,169,0.2);
+      border-radius: 18px;
+    }
+    .success-box.show { display: block; }
+    .success-icon { font-size: 52px; margin-bottom: 18px; }
+    .success-box h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 10px;
+    }
+    .success-box p { font-size: 16px; color: rgba(255,255,255,0.5); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: #030810;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding: 30px 0;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .footer-copy { font-size: 13px; color: rgba(255,255,255,0.28); }
+    .footer-link {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-link:hover { color: white; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .calc-grid { grid-template-columns: 1fr; }
+      .motor-row { grid-template-columns: 1fr; gap: 44px; }
+      .motor-row.flipped .motor-visual { order: 0; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      section { padding: 64px 0; }
+      .hamburger { display: flex; }
+      .nav-desktop { display: none; }
+      .problem-cards { grid-template-columns: 1fr; }
+      .steps-row { grid-template-columns: 1fr; gap: 48px; }
+      .steps-line { display: none; }
+      .hero-ctas .btn { width: 100%; justify-content: center; }
+      .hero-ctas { flex-direction: column; }
+      .hero-trust { flex-direction: column; gap: 8px; }
+      .footer-inner { flex-direction: column; text-align: center; gap: 12px; }
+      .logo-tag { display: none; }
+    }
+    @media (max-width: 540px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 380px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── MOBILE MENU OVERLAY ─── -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#calculator" onclick="closeMobile()">Calculadora</a>
+  <a href="#solution" onclick="closeMobile()">Solução</a>
+  <a href="#steps" onclick="closeMobile()">Como funciona</a>
+  <a href="#contact" onclick="closeMobile()" class="btn btn-primary btn-sm">Começar agora</a>
+</div>
+
+<!-- ═══════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <div class="logo-mark">
+        <span class="logo-text">Reativa<span class="teal">MED</span></span>
+        <span class="logo-tag">Smart Patient Recovery</span>
+      </div>
+      <div class="nav-desktop" style="display:flex;align-items:center;gap:32px;">
+        <a href="#calculator" style="color:rgba(255,255,255,0.55);font-size:14px;font-weight:500;text-decoration:none;transition:color .2s" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">Calculadora</a>
+        <a href="#solution" style="color:rgba(255,255,255,0.55);font-size:14px;font-weight:500;text-decoration:none;transition:color .2s" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">Solução</a>
+        <a href="#steps" style="color:rgba(255,255,255,0.55);font-size:14px;font-weight:500;text-decoration:none;transition:color .2s" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.55)'">Como funciona</a>
+        <a href="https://www.reativamed.pt" class="btn btn-ghost btn-sm">Entrar</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     HERO
+═══════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow-bottom"></div>
+  <div class="hero-grid"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge fade-up">
+        <span class="badge-dot"></span>
+        Novo · Sistema de Reactivação com IA
+      </div>
+      <h1 class="hero-h1 fade-up d1">
+        A tua clínica tem<br><em>dinheiro parado</em><br>na base de dados.
+      </h1>
+      <p class="hero-sub fade-up d2">
+        Pacientes que vieram uma vez e nunca mais voltaram. Nós recuperamo-los automaticamente — via WhatsApp, sem trabalho da tua parte.
+      </p>
+      <div class="hero-ctas fade-up d3">
+        <a href="#contact" class="btn btn-primary">Quero recuperar pacientes →</a>
+        <a href="#solution" class="btn btn-ghost">Ver como funciona ↓</a>
+      </div>
+      <div class="hero-trust fade-up d4">
+        <span class="trust-item">Sem contratos longos</span>
+        <span class="trust-item">Resultados em 7 dias</span>
+        <span class="trust-item">Zero trabalho da tua equipa</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     CALCULATOR
+═══════════════════════════════════════ -->
+<section id="calculator">
+  <div class="container">
+    <span class="section-label fade-up">Calculadora de ROI</span>
+    <h2 class="calc-headline fade-up d1">Quanto está parado na tua base de dados?</h2>
+    <p class="calc-intro fade-up d2">Ajusta os números da tua clínica e vê o impacto real de recuperares os pacientes inativos.</p>
+
+    <div class="calc-grid">
+      <div class="calc-inputs fade-up d1">
+        <!-- Slider pacientes inativos -->
+        <div>
+          <label class="calc-label" for="sliderPacientes">
+            Nº de pacientes inativos
+            <span id="sliderVal" style="margin-left:auto;font-size:15px;font-weight:700;color:#3999a9;">300</span>
+          </label>
+          <div class="range-row">
+            <input type="range" id="sliderPacientes" min="50" max="2000" value="300" step="10">
+          </div>
+          <div class="range-labels"><span>50</span><span>2.000</span></div>
+        </div>
+        <!-- Ticket médio -->
+        <div>
+          <label class="calc-label" for="inputTicket">Ticket médio por consulta (€)</label>
+          <input type="number" class="num-input" id="inputTicket" value="100" min="20" max="2000" step="5">
+          <div class="calc-hint">Valor médio que um paciente gasta por visita</div>
+        </div>
+        <!-- Taxa de reactivação (locked) -->
+        <div>
+          <label class="calc-label" for="inputTaxa">
+            Taxa de reactivação estimada (%)
+            <span class="lock-badge">🔒 Média real</span>
+          </label>
+          <input type="number" class="num-input" id="inputTaxa" value="10" disabled>
+          <div class="calc-hint">Baseado na nossa média real com clínicas clientes</div>
+        </div>
+      </div>
+
+      <!-- Result panel -->
+      <div class="calc-result-box fade-up d2">
+        <div class="result-label">RECEITA POTENCIAL ESTIMADA</div>
+        <div class="result-value" id="resultValue">€30.000</div>
+        <div class="result-desc" id="resultDesc">
+          Se recuperarmos apenas <strong>10%</strong> de <strong>300 pacientes</strong>,<br>
+          geras <strong>€30.000</strong> no primeiro mês.
+        </div>
+        <a href="#contact" class="btn btn-primary" style="width:100%;justify-content:center;">
+          Quero recuperar este valor →
+        </a>
+        <div class="result-note">
+          * Estimativa baseada em conversão média real. Resultados individuais podem variar.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     PROBLEM
+═══════════════════════════════════════ -->
+<section id="problem">
+  <div class="container">
+    <span class="section-label fade-up">O problema</span>
+    <h2 class="problem-headline fade-up d1">Não é falta de pacientes.<br>É falta de seguimento.</h2>
+    <p class="problem-sub fade-up d2">A maioria das clínicas tem tudo o que precisa para crescer — só não está a aproveitar.</p>
+
+    <div class="problem-cards">
+      <div class="problem-card fade-up d1">
+        <div class="p-icon">👻</div>
+        <h3>Pacientes que desaparecem</h3>
+        <p>A maioria dos pacientes inativos não foi embora por insatisfação. Simplesmente ninguém os foi buscar. Um contacto no momento certo faz toda a diferença.</p>
+      </div>
+      <div class="problem-card fade-up d2">
+        <div class="p-icon">🌙</div>
+        <h3>Leads perdidos fora do horário</h3>
+        <p>40% das mensagens chegam fora do horário de trabalho. Sem resposta imediata, o paciente vai à concorrência. O primeiro a responder ganha a consulta.</p>
+      </div>
+      <div class="problem-card fade-up d3">
+        <div class="p-icon">⏳</div>
+        <h3>Tempo perdido em tarefas manuais</h3>
+        <p>A tua equipa gasta horas a confirmar consultas, responder a perguntas repetidas e gerir remarcações. Tempo que podia ser usado com pacientes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SOLUTION
+═══════════════════════════════════════ -->
+<section id="solution">
+  <div class="container">
+    <span class="section-label fade-up" style="display:block;text-align:center;">A solução</span>
+    <h2 class="solution-headline fade-up d1">Dois sistemas. Um resultado:<br>mais consultas.</h2>
+
+    <!-- Motor 1 -->
+    <div class="motor-row fade-up">
+      <div class="motor-content">
+        <span class="motor-tag">Motor 1 — Reactivação Outbound</span>
+        <h3 class="motor-title">Vai buscar os que partiram</h3>
+        <p class="motor-desc">Importas a base de dados de pacientes inativos. O sistema contacta cada um via WhatsApp com uma mensagem personalizada, gere a conversa com IA, e marca a consulta directamente na tua agenda.</p>
+        <ul class="motor-bullets">
+          <li>Segmentação automática por tempo inactivo</li>
+          <li>Mensagens personalizadas com o nome e último tratamento</li>
+          <li>Agendamento automático no Google Calendar</li>
+        </ul>
+      </div>
+      <div class="motor-visual" style="display:flex;justify-content:center;">
+        <!-- WhatsApp mockup -->
+        <div class="wa-mockup">
+          <div class="wa-head">
+            <div class="wa-av">RM</div>
+            <div class="wa-head-text">
+              <p>ReativaMED</p>
+              <span>em linha</span>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-date-sep">Hoje, 10:14</div>
+            <div class="bubble bubble-in">
+              Olá Ana! 😊 Já faz algum tempo desde a sua última visita à clínica. Temos uma proposta especial de regresso para si.
+              <div class="bubble-time">10:14</div>
+            </div>
+            <div class="bubble bubble-out">
+              Olá! Que proposta é essa? 🙂
+              <div class="bubble-time out">10:17 ✓✓</div>
+            </div>
+            <div class="bubble bubble-in">
+              Para pacientes que não nos visitam há mais de 3 meses, estamos a oferecer uma consulta de reavaliação com 20% de desconto. Tem interesse?
+              <div class="bubble-time">10:18</div>
+            </div>
+            <div class="bubble bubble-out">
+              Sim, adorava! Que datas têm disponíveis?
+              <div class="bubble-time out">10:21 ✓✓</div>
+            </div>
+            <div class="bubble bubble-in">
+              Perfeito! Temos disponibilidade na próxima quinta, dia 10, às 14h30 ou 16h. Qual prefere?
+              <div class="bubble-time">10:21</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Motor 2 -->
+    <div class="motor-row flipped fade-up">
+      <div class="motor-content">
+        <span class="motor-tag">Motor 2 — Recepcionista AI 24/7</span>
+        <h3 class="motor-title">Nunca perde os que chegam</h3>
+        <p class="motor-desc">Qualquer mensagem que chegue à clínica — seja às 3h da manhã de domingo — tem resposta em menos de 30 segundos. A Sofia qualifica o lead, responde a dúvidas e marca a consulta.</p>
+        <ul class="motor-bullets">
+          <li>Resposta em menos de 30 segundos, 24 horas por dia</li>
+          <li>Qualificação automática de leads e intenção de compra</li>
+          <li>Disponível 7 dias por semana, sem intervenção humana</li>
+        </ul>
+      </div>
+      <div class="motor-visual" style="display:flex;justify-content:center;">
+        <!-- Dashboard mockup -->
+        <div class="dash-mockup">
+          <div class="dash-top">
+            <span class="dash-title-sm">Motor 2 — Sofia AI</span>
+            <span class="dash-dot"></span>
+          </div>
+          <div class="dash-grid">
+            <div class="dash-card">
+              <div class="dash-num teal">247</div>
+              <div class="dash-lbl">Conversas este mês</div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-num green">38</div>
+              <div class="dash-lbl">Consultas marcadas</div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-num amber">&lt;30s</div>
+              <div class="dash-lbl">Tempo resposta médio</div>
+            </div>
+            <div class="dash-card">
+              <div class="dash-num white">24/7</div>
+              <div class="dash-lbl">Disponibilidade</div>
+            </div>
+          </div>
+          <div class="dash-chart-area">
+            <div class="dash-chart-label">Consultas marcadas — últimos 7 dias</div>
+            <div class="dash-bars">
+              <div class="bar" style="height:35%"></div>
+              <div class="bar" style="height:55%"></div>
+              <div class="bar" style="height:42%"></div>
+              <div class="bar" style="height:70%"></div>
+              <div class="bar active" style="height:88%"></div>
+              <div class="bar active" style="height:76%"></div>
+              <div class="bar active" style="height:100%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     STEPS
+═══════════════════════════════════════ -->
+<section id="steps">
+  <div class="container">
+    <span class="section-label fade-up" style="display:block;text-align:center;">Como funciona</span>
+    <h2 class="steps-headline fade-up d1">Começas a recuperar pacientes<br>em menos de 48 horas.</h2>
+    <p class="steps-sub fade-up d2">Sem tecnicidades, sem formação da equipa. Nós tratamos de tudo.</p>
+
+    <div class="steps-row">
+      <div class="steps-line"></div>
+      <div class="step-item fade-up d1">
+        <span class="step-num">01</span>
+        <h3>Importas a base de dados</h3>
+        <p>Exportas o ficheiro CSV do teu software de gestão. Nós tratamos do resto — limpeza, normalização e segmentação automática.</p>
+      </div>
+      <div class="step-item fade-up d2">
+        <span class="step-num">02</span>
+        <h3>O sistema entra em acção</h3>
+        <p>A IA contacta os pacientes, responde às dúvidas e gere toda a conversa de forma autónoma, 24 horas por dia.</p>
+      </div>
+      <div class="step-item fade-up d3">
+        <span class="step-num">03</span>
+        <h3>Vês os resultados no dashboard</h3>
+        <p>Acompanhas em tempo real quantas consultas foram marcadas, quantos pacientes responderam e quanto foi recuperado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     METRICS
+═══════════════════════════════════════ -->
+<section id="metrics">
+  <div class="container" style="position:relative;z-index:1;">
+    <span class="section-label fade-up" style="display:block;text-align:center;">Resultados</span>
+    <h2 class="metrics-headline fade-up d1">Resultados que podes medir.</h2>
+    <p class="metrics-sub fade-up d2">Números reais, de clínicas reais.</p>
+
+    <div class="metrics-grid">
+      <div class="metric-card fade-up d1">
+        <div class="metric-num" data-target="30" data-prefix="Até ">Até 0</div>
+        <div class="metric-desc">consultas recuperadas<br>no primeiro mês</div>
+      </div>
+      <div class="metric-card fade-up d2">
+        <div class="metric-num" data-static="&lt;30s">&lt;30s</div>
+        <div class="metric-desc">tempo médio de resposta<br>da Sofia</div>
+      </div>
+      <div class="metric-card fade-up d3">
+        <div class="metric-num" data-static="24/7">24/7</div>
+        <div class="metric-desc">disponibilidade sem<br>intervenção humana</div>
+      </div>
+      <div class="metric-card fade-up d4">
+        <div class="metric-num" data-static="Zero">Zero</div>
+        <div class="metric-desc">trabalho adicional<br>para a tua equipa</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     GUARANTEE
+═══════════════════════════════════════ -->
+<section id="guarantee">
+  <div class="container" style="position:relative;z-index:1;">
+    <div style="text-align:center;" class="fade-up">
+      <span class="guarantee-icon">🛡️</span>
+      <h2 class="guarantee-h2">Se não funcionar,<br>não pagas.</h2>
+      <p class="guarantee-body">Se nos primeiros 30 dias não marcares pelo menos 10 consultas através do sistema, não cobras o segundo mês. Simples assim.</p>
+      <p class="guarantee-note">Não temos medo de garantir resultados porque sabemos que o sistema funciona.</p>
+      <a href="#contact" class="btn btn-primary" style="font-size:16px;padding:16px 36px;">Quero começar com garantia →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     CONTACT FORM
+═══════════════════════════════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="form-wrap">
+      <h2 class="form-headline fade-up">Começa agora. Os primeiros<br>30 dias são gratuitos.</h2>
+      <p class="form-sub fade-up d1">Sem compromisso. Sem cartão de crédito. Só resultados.</p>
+
+      <!-- Success state -->
+      <div class="success-box" id="successBox">
+        <div class="success-icon">🎉</div>
+        <h3>Recebemos o teu pedido!</h3>
+        <p>Entraremos em contacto em menos de 24 horas para agendar uma demonstração gratuita.</p>
+      </div>
+
+      <!-- Form -->
+      <form id="leadForm" class="fade-up d1" novalidate>
+        <div class="form-grid">
+          <div class="f-field">
+            <label class="f-label" for="f-nome">Nome completo</label>
+            <input class="f-input" type="text" id="f-nome" name="nome" placeholder="Ana Silva" required autocomplete="name">
+          </div>
+          <div class="f-field">
+            <label class="f-label" for="f-clinica">Nome da clínica</label>
+            <input class="f-input" type="text" id="f-clinica" name="clinica" placeholder="Clínica Exemplo" required>
+          </div>
+          <div class="f-field">
+            <label class="f-label" for="f-tel">Telefone (WhatsApp)</label>
+            <input class="f-input" type="tel" id="f-tel" name="telefone" placeholder="+351 912 345 678" required autocomplete="tel">
+          </div>
+          <div class="f-field">
+            <label class="f-label" for="f-email">Email</label>
+            <input class="f-input" type="email" id="f-email" name="email" placeholder="ana@clinica.pt" required autocomplete="email">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span id="submitText">Quero recuperar os meus pacientes →</span>
+          <span id="submitSpinner" style="display:none;">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="animation:spin 0.75s linear infinite">
+              <circle cx="9" cy="9" r="7" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+              <path d="M9 2a7 7 0 0 1 7 7" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            A enviar...
+          </span>
+        </button>
+      </form>
+
+      <div class="form-divider fade-up d2">Ou preferes falar directamente?</div>
+      <a href="https://wa.me/351XXXXXXXXX" class="btn-wa fade-up d2" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+        </svg>
+        Falar pelo WhatsApp
+      </a>
+
+      <p class="privacy-note fade-up d3">🔒 Os teus dados são usados apenas para te contactarmos. Nunca partilhamos com terceiros.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="logo-mark">
+        <span class="logo-text" style="font-size:17px;">Reativa<span class="teal">MED</span></span>
+      </div>
+      <span class="footer-copy">© 2025 ReativaMED · Smart Patient Recovery</span>
+      <a href="https://www.reativamed.pt" class="footer-link">Entrar na plataforma →</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+
+<script>
+  // ─── NAVBAR SCROLL ───────────────────────────────────────
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 20);
+  }, { passive: true });
+
+  // ─── MOBILE MENU ─────────────────────────────────────────
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+  });
+
+  function closeMobile() {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // ─── CALCULATOR ──────────────────────────────────────────
+  const slider    = document.getElementById('sliderPacientes');
+  const sliderVal = document.getElementById('sliderVal');
+  const inputTicket = document.getElementById('inputTicket');
+  const resultValue = document.getElementById('resultValue');
+  const resultDesc  = document.getElementById('resultDesc');
+
+  function updateCalc() {
+    const pacientes = parseInt(slider.value) || 300;
+    const ticket    = parseFloat(inputTicket.value) || 100;
+    const taxa      = 10;
+    const recuperados = Math.round(pacientes * taxa / 100);
+    const receita     = recuperados * ticket;
+
+    sliderVal.textContent = pacientes.toLocaleString('pt-PT');
+
+    const fmt = (v) => '€' + v.toLocaleString('pt-PT', { maximumFractionDigits: 0 });
+    resultValue.textContent = fmt(receita);
+    resultDesc.innerHTML =
+      `Se recuperarmos apenas <strong>${taxa}%</strong> de <strong>${pacientes.toLocaleString('pt-PT')} pacientes</strong>,<br>` +
+      `geras <strong>${fmt(receita)}</strong> no primeiro mês.`;
+  }
+
+  slider.addEventListener('input', updateCalc);
+  inputTicket.addEventListener('input', updateCalc);
+  updateCalc();
+
+  // ─── INTERSECTION OBSERVER (FADE-UP) ─────────────────────
+  const fadeEls = document.querySelectorAll('.fade-up');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  fadeEls.forEach(el => io.observe(el));
+
+  // ─── COUNTER ANIMATION ───────────────────────────────────
+  const counters = document.querySelectorAll('.metric-num[data-target]');
+  const counterIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el     = e.target;
+      const target = parseInt(el.dataset.target);
+      const prefix = el.dataset.prefix || '';
+      const suffix = el.dataset.suffix || '';
+      const dur    = 1400;
+      const start  = performance.now();
+
+      function tick(now) {
+        const pct  = Math.min((now - start) / dur, 1);
+        const ease = 1 - Math.pow(1 - pct, 3);
+        el.textContent = prefix + Math.round(target * ease) + suffix;
+        if (pct < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      counterIO.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(el => counterIO.observe(el));
+
+  // ─── SMOOTH SCROLL FOR ANCHORS ───────────────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href');
+      if (id === '#') return;
+      const el = document.querySelector(id);
+      if (!el) return;
+      e.preventDefault();
+      const top = el.getBoundingClientRect().top + window.scrollY - 72;
+      window.scrollTo({ top, behavior: 'smooth' });
+    });
+  });
+
+  // ─── FORM SUBMIT ─────────────────────────────────────────
+  const form       = document.getElementById('leadForm');
+  const successBox = document.getElementById('successBox');
+  const submitBtn  = document.getElementById('submitBtn');
+  const submitText = document.getElementById('submitText');
+  const submitSpinner = document.getElementById('submitSpinner');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    const nome    = document.getElementById('f-nome').value.trim();
+    const clinica = document.getElementById('f-clinica').value.trim();
+    const tel     = document.getElementById('f-tel').value.trim();
+    const email   = document.getElementById('f-email').value.trim();
+
+    if (!nome || !clinica || !tel || !email) {
+      alert('Por favor preenche todos os campos.');
+      return;
+    }
+
+    // Loading state
+    submitBtn.disabled = true;
+    submitText.style.display = 'none';
+    submitSpinner.style.display = 'flex';
+    submitSpinner.style.alignItems = 'center';
+    submitSpinner.style.gap = '8px';
+
+    try {
+      // Send to placeholder endpoint (replace with real endpoint)
+      await fetch('https://hooks.zapier.com/hooks/catch/placeholder/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, clinica, telefone: tel, email, source: 'landing-page' }),
+        signal: AbortSignal.timeout(6000),
+      });
+    } catch (_) {
+      // Ignore errors — show success regardless (endpoint is placeholder)
+    }
+
+    // Show success
+    form.style.display = 'none';
+    successBox.classList.add('show');
+    successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+</script>
+</body>
+</html>
