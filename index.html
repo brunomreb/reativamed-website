@@ -174,7 +174,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .sol-intro h2{max-width:640px;margin:0 0 16px}
 .sol-intro p{max-width:640px;margin:0}
 /* bands */
-.sol-band{padding:80px 0}
+.sol-band{padding:80px 0;position:relative;z-index:1}
 .sol-band-a{background:#fff}
 .sol-band-b{background:#f0f9fa}
 .sol-band-grid{display:grid;gap:64px;align-items:flex-start}
@@ -698,8 +698,8 @@ footer{padding:36px 0;background:#060b12;border-top:1px solid rgba(255,255,255,.
         <div class="m-n" data-type="up" data-to="30" data-suffix="+">30+</div>
         <div class="m-lbl">consultas recuperadas<br>no primeiro mês</div>
       </div>
-      <div class="metric" style="min-width:160px">
-        <div class="m-n" data-type="down" data-from="60" data-to="30"><span style="white-space:nowrap;display:inline-block">&lt; 30s</span></div>
+      <div class="metric" style="min-width:180px;overflow:hidden">
+        <div class="m-n" style="white-space:nowrap">&lt; 30s</div>
         <div class="m-lbl">tempo de resposta<br>do assistente IA</div>
       </div>
       <div class="metric">
