@@ -3,742 +3,845 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ReativaMED — Recupera Pacientes Inativos Automaticamente</title>
-<meta name="description" content="Sistema de reactivação de pacientes para clínicas de estética. IA via WhatsApp que recupera consultas perdidas automaticamente.">
+<title>ReativaMED — Recupera Pacientes Inativos para Clínicas de Estética</title>
+<meta name="description" content="Plataforma de recuperação de pacientes inativos para clínicas de medicina estética em Portugal. IA via WhatsApp que marca consultas automaticamente.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'Geist',-apple-system,sans-serif;background:#fff;color:#0a0f14;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-.wrap{max-width:1120px;margin:0 auto;padding:0 32px}
+
+/* ── BASE ── */
+.c{max-width:1140px;margin:0 auto;padding:0 32px}
 a{text-decoration:none;color:inherit}
-img{display:block}
 
 /* ── TYPOGRAPHY ── */
-.label{font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:#3999a9}
-h1{font-size:clamp(52px,8vw,96px);font-weight:800;line-height:.95;letter-spacing:-.03em;color:#0a0f14}
-h2{font-size:clamp(36px,5vw,64px);font-weight:700;line-height:1.05;letter-spacing:-.025em;color:#0a0f14}
-h3{font-size:clamp(22px,3vw,28px);font-weight:700;letter-spacing:-.02em;color:#0a0f14;line-height:1.2}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:#3999a9;display:block;margin-bottom:18px}
+h1{font-size:clamp(44px,7vw,96px);font-weight:800;line-height:.92;letter-spacing:-.03em}
+h2{font-size:clamp(36px,5vw,64px);font-weight:800;line-height:1.0;letter-spacing:-.025em}
+h3{font-size:clamp(20px,2.5vw,26px);font-weight:700;letter-spacing:-.02em;line-height:1.2}
 p{font-size:17px;font-weight:300;line-height:1.7;color:#4a6572}
-strong{font-weight:600;color:#0a0f14}
 .teal{color:#3999a9}
+.white{color:#fff}
+.dark{color:#0a0f14}
 
 /* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:8px;padding:15px 30px;border-radius:6px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;border:none;transition:background .18s,color .18s,border-color .18s}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:16px 32px;border-radius:6px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;border:none;transition:background .2s,border-color .2s,color .2s}
+.btn:active{transform:scale(.99)}
 .btn-teal{background:#3999a9;color:#fff}.btn-teal:hover{background:#2d7d8a}
-.btn-outline{background:transparent;color:#3999a9;border:1.5px solid #3999a9}.btn-outline:hover{background:#3999a9;color:#fff}
-.btn-white{background:#fff;color:#3999a9;border:none}.btn-white:hover{background:#f0f9fa}
-.btn-white-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5)}.btn-white-outline:hover{border-color:#fff;background:rgba(255,255,255,.08)}
-.btn-lg{padding:18px 38px;font-size:16px}
+.btn-ghost-dark{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3)}.btn-ghost-dark:hover{border-color:rgba(255,255,255,.7)}
+.btn-ghost-light{background:transparent;color:#3999a9;border:1.5px solid #3999a9}.btn-ghost-light:hover{background:#3999a9;color:#fff}
+.btn-white{background:#fff;color:#3999a9}.btn-white:hover{background:#f0f9fa}
+.btn-wa{background:#25d366;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px;font-family:inherit;font-size:15px;font-weight:600;border-radius:6px;border:none;cursor:pointer;transition:background .2s}.btn-wa:hover{background:#1fb855}
+.btn-fw{width:100%;justify-content:center;padding:18px 32px;font-size:17px}
 
-/* ── LOGO ── */
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-word{font-size:19px;font-weight:800;letter-spacing:-.04em;color:#0a0f14;line-height:1}
-.logo-word .m{color:#3999a9}
+/* ── PILL BADGE ── */
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;font-size:12px;font-weight:600;letter-spacing:.04em;margin-bottom:28px}
+.pill-teal{border:1.5px solid rgba(57,153,169,.45);color:#3999a9;background:rgba(57,153,169,.07)}
+.pill-teal-dk{border:1.5px solid rgba(57,153,169,.5);color:#6ee7f7;background:rgba(57,153,169,.1)}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:#3999a9;flex-shrink:0}
 
-/* ── FADE ANIMATIONS ── */
-.fi{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
-.fi.v{opacity:1;transform:none}
-.fi.d1{transition-delay:.07s}.fi.d2{transition-delay:.14s}.fi.d3{transition-delay:.21s}.fi.d4{transition-delay:.28s}
+/* ── FADE UP ── */
+.fu{opacity:0;transform:translateY(22px);transition:opacity .65s ease,transform .65s ease}
+.fu.on{opacity:1;transform:none}
+.fu.d1{transition-delay:.07s}.fu.d2{transition-delay:.14s}.fu.d3{transition-delay:.21s}.fu.d4{transition-delay:.28s}
 
-/* ════════════════════════════
+/* ══════════════════════════════
    NAVBAR
-════════════════════════════ */
-#nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #e8f4f6}
-.nav-inner{display:flex;align-items:center;justify-content:space-between;height:62px}
+══════════════════════════════ */
+#nav{position:fixed;top:0;left:0;right:0;z-index:200;transition:background .3s,border-color .3s,backdrop-filter .3s}
+#nav.dark{background:transparent}
+#nav.light{background:#fff;border-bottom:1px solid #e2e8f0}
+.nav-c{display:flex;align-items:center;justify-content:space-between;height:64px}
+/* logo */
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-txt{font-size:19px;font-weight:700;line-height:1;letter-spacing:-.03em}
+.logo-txt .r{color:#0a0f14}.logo-txt .m{color:#3999a9}
+#nav.dark .logo-txt .r{color:#fff}
+/* nav btn */
+.nav-btn-dark{border:1.5px solid rgba(255,255,255,.35);color:#fff;background:transparent;padding:9px 22px;border-radius:6px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:border-color .2s}
+.nav-btn-dark:hover{border-color:#fff}
+.nav-btn-light{border:1.5px solid #3999a9;color:#3999a9;background:transparent;padding:9px 22px;border-radius:6px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
+.nav-btn-light:hover{background:#3999a9;color:#fff}
 .hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
-.hamburger span{display:block;width:22px;height:2px;background:#0a0f14;border-radius:2px;transition:transform .25s,opacity .25s}
+.hamburger span{display:block;width:22px;height:2px;border-radius:2px;transition:transform .26s,opacity .26s}
+#nav.dark .hamburger span{background:#fff}
+#nav.light .hamburger span{background:#0a0f14}
 .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
 .hamburger.open span:nth-child(2){opacity:0}
 .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
-.mobile-drop{display:none;position:absolute;top:62px;left:0;right:0;background:#fff;border-bottom:1px solid #e8f4f6;padding:24px 32px;flex-direction:column;gap:20px}
-.mobile-drop.open{display:flex}
-.mobile-drop a{font-size:18px;font-weight:600;color:#0a0f14}
+/* Mobile overlay */
+#m-overlay{display:none;position:fixed;inset:0;background:#060b12;z-index:190;flex-direction:column;padding:0 32px}
+#m-overlay.open{display:flex}
+.m-ov-top{height:64px;display:flex;align-items:center}
+.m-ov-links{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px}
+.m-ov-links a{font-size:28px;font-weight:700;color:#fff;letter-spacing:-.02em}
+.m-ov-links a:hover{color:#3999a9}
+.m-ov-bottom{padding-bottom:48px}
 
-/* ════════════════════════════
+/* ══════════════════════════════
    HERO
-════════════════════════════ */
-#hero{min-height:100svh;display:grid;grid-template-columns:3fr 2fr;align-items:center;position:relative;overflow:hidden}
-.hero-left{padding:80px 0 80px 32px;max-width:640px;position:relative;z-index:2}
-.hero-left .label{display:block;margin-bottom:28px}
-.hero-left h1{margin-bottom:28px}
-.hero-sub{max-width:480px;margin-bottom:40px;font-size:18px}
-.hero-ctas{display:flex;gap:12px;margin-bottom:40px;flex-wrap:wrap}
-.hero-trust{display:flex;flex-direction:column;gap:8px}
-.trust-line{font-size:13px;font-weight:400;color:#4a6572;display:flex;align-items:center;gap:8px}
-.trust-line::before{content:'';width:14px;height:14px;border-radius:50%;background:#3999a9;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center}
+══════════════════════════════ */
+#hero{min-height:100svh;background:#060b12;display:flex;align-items:center;padding:80px 0;position:relative;overflow:hidden}
+.hero-bg-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 85% 10%,rgba(57,153,169,.18) 0%,transparent 60%);pointer-events:none}
+.hero-bg-dots{position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(255,255,255,.045) 1px,transparent 1px);
+  background-size:24px 24px}
+.hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:55% 45%;gap:48px;align-items:center}
+/* hero left */
+.hero-copy{}
+.hero-copy h1{color:#fff;margin-bottom:24px}
+.hero-copy h1 .hl{color:#3999a9}
+.hero-body{font-size:17px;font-weight:300;color:rgba(255,255,255,.65);line-height:1.7;max-width:480px;margin-bottom:40px}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+.hero-trust{font-size:13px;color:rgba(255,255,255,.4);letter-spacing:.01em}
+/* hero right — phone */
+.hero-phone-wrap{display:flex;justify-content:center;align-items:center;padding:24px 0}
+.iphone{width:264px;border-radius:44px;background:#1c1c1e;border:7px solid #2c2c2e;position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px #3a3a3c, 0 0 80px rgba(57,153,169,.28), 0 48px 96px rgba(0,0,0,.55)}
+.iphone-notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:92px;height:26px;background:#1c1c1e;border-radius:20px;z-index:20}
+.iphone-screen{display:flex;flex-direction:column;min-height:520px;background:#0d1117}
+.wa-bar{background:#1e3040;padding:50px 14px 12px;display:flex;align-items:center;gap:10px}
+.wa-bar-av{width:34px;height:34px;border-radius:50%;background:#3999a9;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.wa-bar-info p{font-size:13px;font-weight:600;color:#fff;line-height:1.2}
+.wa-bar-info small{font-size:10.5px;color:rgba(255,255,255,.45);display:flex;align-items:center;gap:4px}
+.wa-online{width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block}
+.wa-body{padding:12px 12px 16px;display:flex;flex-direction:column;gap:8px;background:#0d1117;flex:1}
+.wa-date{text-align:center;font-size:10px;color:rgba(255,255,255,.25);padding:2px 0 4px}
+.w{font-size:12.5px;line-height:1.5;padding:9px 12px;max-width:86%}
+.w-in{background:#1e2a38;color:rgba(255,255,255,.82);border-radius:4px 14px 14px 14px;align-self:flex-start}
+.w-out{background:#1a4d5c;color:rgba(255,255,255,.92);border-radius:14px 4px 14px 14px;align-self:flex-end}
+.w-meta{font-size:10px;color:rgba(255,255,255,.3);text-align:right;margin-top:3px;display:flex;align-items:center;justify-content:flex-end;gap:3px}
+.w-meta.out{color:rgba(130,210,230,.5)}
+.tick svg{width:14px;height:9px}
 
-/* Hero right geometric composition */
-.hero-right{position:relative;height:100%;min-height:100svh;overflow:hidden}
-.geo-bg{position:absolute;inset:0;background:#f0f9fa;clip-path:polygon(18% 0,100% 0,100% 100%,0 100%)}
-.geo-stripe{position:absolute;top:0;bottom:0;left:0;width:6px;background:#3999a9}
-.geo-accent1{position:absolute;top:12%;right:8%;width:52px;height:52px;background:#3999a9;border-radius:4px}
-.geo-accent2{position:absolute;bottom:14%;right:16%;width:28px;height:28px;background:rgba(57,153,169,.25);border-radius:50%}
-.geo-accent3{position:absolute;top:58%;right:4%;width:4px;height:120px;background:#3999a9;opacity:.35;border-radius:2px}
-.hero-wa-wrap{position:absolute;top:50%;left:50%;transform:translate(-44%,-50%);width:260px}
-
-/* Mini hero WA */
-.wa-mini{background:#0b1217;border-radius:14px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.06)}
-.wa-mini-head{background:#1a2535;padding:11px 14px;display:flex;align-items:center;gap:9px}
-.wa-mini-av{width:30px;height:30px;border-radius:50%;background:#3999a9;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.wa-mini-info{font-size:12px;font-weight:600;color:#fff}
-.wa-mini-info small{display:block;font-size:10px;font-weight:400;color:rgba(255,255,255,.4)}
-.wa-mini-body{padding:12px;display:flex;flex-direction:column;gap:7px;background:#0b1217}
-.bub{font-size:12px;line-height:1.45;padding:8px 11px;max-width:85%;border-radius:3px 12px 12px 12px;color:rgba(255,255,255,.82);background:#1e2a36}
-.bub.out{background:#1b4d5c;border-radius:12px 3px 12px 12px;align-self:flex-end;color:rgba(255,255,255,.9)}
-.bub-time{font-size:9px;color:rgba(255,255,255,.3);margin-top:3px;text-align:right}
-.bub-time.out{color:rgba(155,220,230,.4)}
-
-/* ════════════════════════════
+/* ══════════════════════════════
    CALCULATOR
-════════════════════════════ */
-#calc{padding:100px 0;background:#fff}
+══════════════════════════════ */
+#calc{padding:112px 0;background:#fff}
 .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
-.calc-left h2{margin-bottom:20px}
-.calc-left p{margin-bottom:8px}
-.calc-left .label{display:block;margin-bottom:16px}
-.calc-card{border:2px solid #3999a9;border-radius:8px;padding:40px;background:#fff}
-.cf-label{font-size:13px;font-weight:500;color:#0a0f14;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-.cf-label span{font-size:14px;font-weight:700;color:#3999a9}
-.cf-group{margin-bottom:28px}
-input[type=range]{width:100%;height:3px;-webkit-appearance:none;appearance:none;background:#e8f4f6;border-radius:2px;outline:none;cursor:pointer;margin-bottom:4px}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#3999a9;cursor:pointer;border:3px solid #fff;box-shadow:0 0 0 1.5px #3999a9}
-input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#3999a9;border:3px solid #fff;box-shadow:0 0 0 1.5px #3999a9;cursor:pointer}
-.range-ends{display:flex;justify-content:space-between;font-size:11px;color:#94a3b8}
-.cf-input{width:100%;padding:11px 14px;font-family:inherit;font-size:15px;border:1.5px solid #e8f4f6;border-radius:6px;color:#0a0f14;outline:none;transition:border-color .18s;background:#fff}
+.calc-left h2{color:#0a0f14;margin-bottom:20px}
+.calc-left p{margin-bottom:24px}
+.calc-stat{font-size:clamp(22px,3vw,32px);font-weight:800;color:#3999a9;letter-spacing:-.03em;line-height:1.1;margin-top:8px}
+.calc-stat small{font-size:15px;font-weight:300;color:#4a6572;letter-spacing:0;display:block;margin-top:4px}
+.calc-card{border:2px solid #3999a9;border-radius:12px;padding:38px;background:#fff}
+.cf-lbl{font-size:13px;font-weight:600;color:#0a0f14;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.cf-lbl .val{color:#3999a9;font-size:14px}
+.cf-g{margin-bottom:28px}
+.cf-g:last-of-type{margin-bottom:0}
+/* range */
+input[type=range]{width:100%;height:3px;-webkit-appearance:none;appearance:none;background:#e8f4f6;border-radius:2px;outline:none;cursor:pointer;margin-top:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#3999a9;cursor:pointer;border:3px solid #fff;box-shadow:0 0 0 1.5px #3999a9,0 2px 8px rgba(57,153,169,.4)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#3999a9;border:3px solid #fff;box-shadow:0 0 0 1.5px #3999a9;cursor:pointer}
+.range-ends{display:flex;justify-content:space-between;font-size:11px;color:#b0c4cb;margin-top:5px}
+.cf-input{width:100%;padding:11px 14px;font-family:inherit;font-size:15px;border:1.5px solid #e2e8f0;border-radius:6px;color:#0a0f14;outline:none;transition:border-color .18s;background:#fff}
 .cf-input:focus{border-color:#3999a9}
 .cf-input:disabled{background:#f8fbfc;color:#94a3b8;cursor:not-allowed}
-.lock-tag{font-size:10px;font-weight:600;background:#f0f9fa;color:#3999a9;padding:2px 8px;border-radius:100px;letter-spacing:.05em}
-.cf-result{margin-top:32px;padding-top:28px;border-top:1px solid #e8f4f6}
-.cf-result-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#4a6572;margin-bottom:8px}
-.cf-result-num{font-size:clamp(48px,6vw,64px);font-weight:800;letter-spacing:-.04em;color:#3999a9;line-height:1;margin-bottom:10px}
-.cf-result-desc{font-size:14px;color:#4a6572;line-height:1.6;margin-bottom:24px}
+.lock{font-size:10.5px;font-weight:600;background:#f0f9fa;color:#3999a9;border:1px solid rgba(57,153,169,.2);padding:2px 9px;border-radius:100px}
+.cf-hint{font-size:11.5px;color:#94a3b8;margin-top:6px;line-height:1.5}
+/* result */
+.cf-result{border-top:1px solid #e8f4f6;margin-top:28px;padding-top:26px}
+.cf-r-lbl{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#4a6572;margin-bottom:6px}
+.cf-r-num{font-size:72px;font-weight:800;letter-spacing:-.04em;color:#3999a9;line-height:1;margin-bottom:8px;transition:transform .15s}
+.cf-r-num.pulse{transform:scale(1.04)}
+.cf-r-sub{font-size:14px;color:#4a6572;line-height:1.6;margin-bottom:24px}
 
-/* ════════════════════════════
+/* ══════════════════════════════
    PROBLEM
-════════════════════════════ */
-#problem{padding:100px 0;background:#f0f9fa}
-.problem-header{margin-bottom:64px;max-width:680px}
-.problem-header h2{margin-bottom:20px}
-.problem-list{border-top:1px solid #c8e6ea}
-.pb-item{display:grid;grid-template-columns:120px 1fr;gap:0;padding:44px 0;border-bottom:1px solid #c8e6ea;align-items:start}
-.pb-num{font-size:clamp(52px,6vw,72px);font-weight:800;letter-spacing:-.05em;color:#3999a9;line-height:1;opacity:.85}
-.pb-content{padding-top:12px}
-.pb-content h3{margin-bottom:10px;font-size:clamp(20px,2.5vw,24px)}
-.pb-content p{max-width:560px}
+══════════════════════════════ */
+#problem{padding:112px 0;background:#f0f9fa}
+.prob-grid{display:grid;grid-template-columns:40% 60%;gap:80px;align-items:start}
+.prob-left h2{color:#0a0f14;margin-bottom:20px}
+.prob-right{display:flex;flex-direction:column;gap:0;border-top:1px solid #c8e6ea}
+.prob-item{display:grid;grid-template-columns:100px 1fr;gap:0;padding:36px 0;border-bottom:1px solid #c8e6ea}
+.prob-num{font-size:clamp(48px,6vw,72px);font-weight:800;color:#3999a9;line-height:1;letter-spacing:-.05em;opacity:.9}
+.prob-text{padding-top:8px}
+.prob-text h3{font-size:20px;margin-bottom:8px;color:#0a0f14}
+.prob-text p{font-size:15px;max-width:440px}
 
-/* ════════════════════════════
+/* ══════════════════════════════
    SOLUTION
-════════════════════════════ */
-#solution{padding:100px 0 0;background:#fff}
-.solution-head{margin-bottom:80px}
-.solution-head h2{margin-bottom:0}
-.sol-band{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:stretch;margin:0 -32px}
-.sol-band.alt{background:#f0f9fa}
-.sol-text{padding:72px 64px 72px 64px}
-.sol-visual{padding:48px 48px;display:flex;align-items:center;justify-content:center;min-height:500px}
-.sol-band.alt .sol-visual{order:-1}
-.sol-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#3999a9;margin-bottom:20px}
-.sol-title{font-size:clamp(28px,3.5vw,40px);font-weight:700;letter-spacing:-.025em;color:#0a0f14;line-height:1.1;margin-bottom:20px}
-.sol-desc{font-size:16px;font-weight:300;color:#4a6572;line-height:1.7;margin-bottom:28px;max-width:420px}
-.sol-list{list-style:none;display:flex;flex-direction:column;gap:10px}
-.sol-list li{font-size:14.5px;color:#0a0f14;display:flex;gap:12px;align-items:flex-start;line-height:1.55}
-.sol-list li::before{content:'';width:6px;height:6px;border-radius:50%;background:#3999a9;flex-shrink:0;margin-top:7px}
-
-/* Full WA mockup */
-.wa-full{background:#0b1217;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.16);border:1px solid rgba(255,255,255,.06);width:100%;max-width:300px}
-.wa-full-head{background:#1a2535;padding:13px 16px;display:flex;align-items:center;gap:10px}
-.wa-full-av{width:34px;height:34px;border-radius:50%;background:#3999a9;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.wa-full-info p{font-size:13px;font-weight:600;color:#fff;line-height:1.2}
-.wa-full-info small{font-size:10.5px;color:rgba(255,255,255,.38)}
-.wa-full-body{padding:14px 14px 18px;display:flex;flex-direction:column;gap:8px}
-.wb{font-size:13px;line-height:1.5;padding:9px 12px;max-width:84%;position:relative}
-.wb.in{background:#1e2a36;color:rgba(255,255,255,.82);border-radius:3px 12px 12px 12px;align-self:flex-start}
-.wb.out{background:#1b4d5c;color:rgba(255,255,255,.92);border-radius:12px 3px 12px 12px;align-self:flex-end}
-.wb-t{font-size:10px;color:rgba(255,255,255,.28);margin-top:3px;text-align:right;display:flex;align-items:center;justify-content:flex-end;gap:4px}
-.wb-t.out{color:rgba(130,210,230,.45)}
-.wb-t svg{width:12px;height:8px;flex-shrink:0}
-.wa-date{text-align:center;font-size:10.5px;color:rgba(255,255,255,.22);padding:4px 0 2px}
-
+══════════════════════════════ */
+#solution{}
+.sol-intro{padding:112px 0 72px;background:#fff;text-align:center}
+.sol-intro h2{max-width:700px;margin:0 auto 16px}
+.sol-intro p{max-width:600px;margin:0 auto}
+/* bands */
+.sol-band{padding:80px 0}
+.sol-band-a{background:#fff}
+.sol-band-b{background:#f0f9fa}
+.sol-band-grid{display:grid;gap:64px;align-items:center}
+.sol-band-grid.cols55{grid-template-columns:55% 45%}
+.sol-band-grid.cols45{grid-template-columns:45% 55%}
+.motor-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#3999a9;background:rgba(57,153,169,.09);border:1px solid rgba(57,153,169,.22);padding:5px 14px;border-radius:100px;margin-bottom:18px}
+.motor-title{font-size:clamp(26px,3.5vw,40px);font-weight:700;letter-spacing:-.025em;color:#0a0f14;line-height:1.1;margin-bottom:16px}
+.motor-body{font-size:16px;font-weight:300;color:#4a6572;line-height:1.7;margin-bottom:0}
+.motor-note{border:1.5px solid rgba(57,153,169,.35);border-radius:8px;padding:14px 18px;background:rgba(57,153,169,.05);margin:20px 0 24px}
+.motor-note p{font-size:13.5px;color:#2d7d8a;font-weight:400;line-height:1.6;margin:0}
+.motor-bullets{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:24px}
+.motor-bullets li{font-size:15px;color:#0a0f14;display:flex;gap:12px;line-height:1.55;font-weight:400}
+.motor-bullets li::before{content:'—';color:#3999a9;font-weight:700;flex-shrink:0}
+/* Solution phone (smaller than hero) */
+.sol-phone{display:flex;justify-content:center}
+.iphone-sm{width:230px;border-radius:38px;background:#1c1c1e;border:6px solid #2c2c2e;position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px #3a3a3c,0 0 48px rgba(57,153,169,.18),0 32px 64px rgba(0,0,0,.3)}
+.iphone-sm .iphone-notch{width:78px;height:22px;top:10px}
+.iphone-sm .iphone-screen{min-height:420px}
+.iphone-sm .wa-bar{padding-top:42px}
 /* Dashboard mockup */
-.dash{background:#fff;border:1.5px solid #e8f4f6;border-radius:14px;padding:24px;width:100%;max-width:320px;box-shadow:0 4px 24px rgba(57,153,169,.08)}
-.dash-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.dash-hd-t{font-size:12px;font-weight:600;color:#4a6572;letter-spacing:.05em;text-transform:uppercase}
-.dash-live{display:flex;align-items:center;gap:6px;font-size:11px;color:#3999a9;font-weight:500}
-.dash-live::before{content:'';width:6px;height:6px;border-radius:50%;background:#3999a9;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(57,153,169,.4)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(57,153,169,0)}}
-.dash-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.dash-mock{background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:24px;box-shadow:0 2px 16px rgba(57,153,169,.07);max-width:340px;margin:0 auto}
+.dash-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.dash-head-t{font-size:12px;font-weight:600;color:#4a6572;text-transform:uppercase;letter-spacing:.06em}
+.dash-live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#3999a9}
+.dash-live::before{content:'';width:6px;height:6px;border-radius:50%;background:#3999a9;animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(57,153,169,.4)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(57,153,169,0)}}
+.dash-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .ds{padding:14px;background:#f0f9fa;border-radius:8px}
-.ds-n{font-size:24px;font-weight:800;letter-spacing:-.03em;color:#3999a9;line-height:1;margin-bottom:4px}
+.ds-n{font-size:26px;font-weight:800;letter-spacing:-.03em;color:#3999a9;line-height:1;margin-bottom:4px}
 .ds-l{font-size:11px;color:#4a6572;line-height:1.4}
-.dash-chart{background:#f8fbfc;border-radius:6px;padding:14px 12px 8px}
-.dash-chart-label{font-size:10.5px;color:#94a3b8;margin-bottom:10px}
-.bars{display:flex;align-items:flex-end;gap:5px;height:48px}
-.bar{flex:1;border-radius:2px 2px 0 0;background:#c8e6ea;min-height:5px}
-.bar.hi{background:#3999a9}
-.bar.md{background:#7ec5cf}
+.dash-bars-wrap{background:#f8fbfc;border-radius:8px;padding:14px 12px 8px}
+.dash-bars-lbl{font-size:10.5px;color:#94a3b8;margin-bottom:10px}
+.dash-bars{display:flex;align-items:flex-end;gap:5px;height:52px}
+.db{flex:1;border-radius:2px 2px 0 0;min-height:5px;background:#c8e6ea}
+.db.hi{background:#3999a9}.db.md{background:#7ec5cf}
 
-/* ════════════════════════════
-   STEPS / TIMELINE
-════════════════════════════ */
-#steps{padding:100px 0;background:#fff;border-top:1px solid #e8f4f6}
-.steps-head{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-bottom:80px;align-items:end}
-.steps-head h2{margin-bottom:0}
-.steps-head-right p{font-size:18px;margin-bottom:0}
-.timeline{position:relative;padding-left:48px}
-.timeline::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,#3999a9 0%,rgba(57,153,169,.15) 100%)}
-.tl-item{position:relative;padding:0 0 64px 40px}
+/* ══════════════════════════════
+   HOW IT WORKS
+══════════════════════════════ */
+#how{padding:112px 0;background:#f0f9fa}
+.how-top{margin-bottom:80px}
+.how-top h2{max-width:640px}
+.how-top p{margin-top:12px;font-size:17px;font-weight:600;color:#3999a9}
+.timeline{position:relative;padding-left:44px}
+.timeline::before{content:'';position:absolute;left:0;top:6px;bottom:24px;width:2px;background:linear-gradient(180deg,#3999a9 0%,rgba(57,153,169,.12) 100%)}
+.tl-item{position:relative;padding-bottom:64px}
 .tl-item:last-child{padding-bottom:0}
-.tl-dot{position:absolute;left:-7px;top:4px;width:16px;height:16px;border-radius:50%;background:#3999a9;border:3px solid #fff;box-shadow:0 0 0 2px #3999a9}
-.tl-num{font-size:11px;font-weight:700;letter-spacing:.15em;color:#3999a9;text-transform:uppercase;margin-bottom:12px}
-.tl-item h3{margin-bottom:10px;font-size:clamp(20px,2.5vw,26px)}
-.tl-item p{max-width:480px}
-.tl-bottom{margin-top:56px;padding-left:88px;font-size:14px;font-weight:600;color:#3999a9;letter-spacing:.02em}
+.tl-dot{position:absolute;left:-50px;top:4px;width:16px;height:16px;border-radius:50%;background:#3999a9;border:3px solid #f0f9fa;box-shadow:0 0 0 2px #3999a9}
+.tl-n{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#3999a9;margin-bottom:10px}
+.tl-item h3{margin-bottom:10px}
+.tl-item p{max-width:520px}
+.how-bottom{margin-top:64px;padding-left:0;font-size:16px;font-weight:600;color:#3999a9}
 
-/* ════════════════════════════
+/* ══════════════════════════════
    METRICS
-════════════════════════════ */
-#metrics{padding:80px 0;background:#3999a9}
-.metrics-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-left:1px solid rgba(255,255,255,.15)}
-.metric{padding:48px 36px;border-right:1px solid rgba(255,255,255,.15)}
-.metric-n{font-size:clamp(48px,7vw,80px);font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1;margin-bottom:10px}
-.metric-d{font-size:14px;color:rgba(255,255,255,.8);line-height:1.5;font-weight:400}
+══════════════════════════════ */
+#metrics{padding:0;background:#3999a9}
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);border-left:1px solid rgba(255,255,255,.18)}
+.metric{padding:72px 36px;border-right:1px solid rgba(255,255,255,.18);text-align:center}
+.m-n{font-size:clamp(48px,7vw,80px);font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1;margin-bottom:12px}
+.m-lbl{font-size:14px;color:rgba(255,255,255,.75);line-height:1.5;font-weight:400}
 
-/* ════════════════════════════
+/* ══════════════════════════════
    GUARANTEE
-════════════════════════════ */
+══════════════════════════════ */
 #guarantee{padding:120px 0;background:#fff}
-.guarantee-inner{padding-left:40px;border-left:8px solid #3999a9;max-width:760px}
-.guarantee-inner .label{display:block;margin-bottom:24px}
-.guarantee-inner h2{margin-bottom:24px}
-.guarantee-inner p{margin-bottom:36px;font-size:19px;max-width:600px}
-.guarantee-note{font-size:13px;color:#4a6572;margin-bottom:0;margin-top:-20px}
+.guar-inner{max-width:760px;margin:0 auto;padding-left:40px;border-left:8px solid #3999a9}
+.guar-inner .lbl{margin-bottom:24px}
+.guar-inner h2{color:#0a0f14;margin-bottom:24px;font-size:clamp(40px,5.5vw,64px)}
+.guar-body{font-size:19px;font-weight:300;line-height:1.7;color:#4a6572;max-width:640px;margin-bottom:16px}
+.guar-line{font-size:17px;font-weight:600;color:#3999a9;margin-bottom:40px}
 
-/* ════════════════════════════
-   CONTACT FORM
-════════════════════════════ */
-#contact{padding:100px 0;background:#3999a9}
-.contact-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
-.contact-left .label{display:block;margin-bottom:20px;color:rgba(255,255,255,.7)}
-.contact-left h2{color:#fff;margin-bottom:16px}
-.contact-left p{color:rgba(255,255,255,.75);margin-bottom:0}
-.contact-form-wrap{}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+/* ══════════════════════════════
+   FORM
+══════════════════════════════ */
+#form{padding:112px 0;background:#060b12;position:relative;overflow:hidden}
+#form::before{content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:24px 24px;pointer-events:none}
+.form-grid{position:relative;z-index:1;display:grid;grid-template-columns:45% 55%;gap:72px;align-items:start}
+/* form left */
+.form-left h2{color:#fff;font-size:clamp(32px,4.5vw,48px);margin-bottom:18px}
+.form-left p{color:rgba(255,255,255,.6);margin-bottom:32px}
+.form-trust{display:flex;flex-direction:column;gap:12px}
+.form-trust-item{display:flex;align-items:flex-start;gap:12px;font-size:14px;font-weight:400;color:rgba(255,255,255,.65)}
+.form-trust-item::before{content:'✓';color:#3999a9;font-weight:700;flex-shrink:0;margin-top:1px}
+/* form card */
+.form-card{background:#0d1520;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:40px}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.f-row.single{grid-template-columns:1fr}
 .ff{display:flex;flex-direction:column;gap:7px}
-.ff.full{grid-column:1/-1}
-.ff label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65)}
-.fi-input{width:100%;padding:13px 16px;font-family:inherit;font-size:15px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);border-radius:6px;color:#fff;outline:none;transition:border-color .18s,background .18s}
-.fi-input::placeholder{color:rgba(255,255,255,.3)}
-.fi-input:focus{border-color:#fff;background:rgba(255,255,255,.18)}
-.btn-submit{width:100%;padding:17px;font-family:inherit;font-size:16px;font-weight:700;background:#fff;color:#3999a9;border:none;border-radius:6px;cursor:pointer;transition:background .18s,transform .1s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-submit:hover{background:#f0f9fa}
-.btn-submit:active{transform:scale(.99)}
-.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.form-wa{display:flex;align-items:center;gap:12px;margin-top:20px;font-size:14px;color:rgba(255,255,255,.65)}
-.form-wa a{color:#fff;font-weight:600;text-decoration:underline;text-underline-offset:3px}
-.privacy{font-size:11.5px;color:rgba(255,255,255,.45);margin-top:14px;line-height:1.6}
-.success-box{display:none;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:48px 36px;text-align:center}
-.success-box.show{display:block}
-.success-box h3{font-size:24px;font-weight:700;color:#fff;margin-bottom:10px}
-.success-box p{color:rgba(255,255,255,.75);font-size:16px}
-.check-circle{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.ff label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.fi{width:100%;padding:13px 16px;font-family:inherit;font-size:15px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;outline:none;transition:border-color .18s,background .18s}
+.fi::placeholder{color:rgba(255,255,255,.2)}
+.fi:focus{border-color:#3999a9;background:rgba(57,153,169,.06)}
+.fi.err{border-color:rgba(255,80,80,.6)}
+.btn-submit{width:100%;padding:18px;font-family:inherit;font-size:17px;font-weight:700;background:#3999a9;color:#fff;border:none;border-radius:6px;cursor:pointer;transition:background .2s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-submit:hover{background:#2d7d8a}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed}
+.form-divider{text-align:center;font-size:13px;color:rgba(255,255,255,.28);margin:20px 0;position:relative}
+.form-divider::before,.form-divider::after{content:'';position:absolute;top:50%;height:1px;width:36%;background:rgba(255,255,255,.08)}
+.form-divider::before{left:0}.form-divider::after{right:0}
+.privacy{font-size:11.5px;color:rgba(255,255,255,.28);margin-top:16px;line-height:1.6;text-align:center}
+/* success */
+.form-success{display:none;text-align:center;padding:56px 32px}
+.form-success.show{display:block}
+.fs-check{width:56px;height:56px;border-radius:50%;background:rgba(57,153,169,.15);border:2px solid rgba(57,153,169,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.form-success h3{font-size:24px;font-weight:700;color:#fff;margin-bottom:10px}
+.form-success p{font-size:16px;color:rgba(255,255,255,.55)}
 
-/* ════════════════════════════
+/* ══════════════════════════════
    FOOTER
-════════════════════════════ */
-footer{padding:28px 0;background:#fff;border-top:1px solid #e8f4f6}
-.foot-inner{display:flex;align-items:center;justify-content:space-between;gap:20px}
-.foot-copy{font-size:13px;color:#94a3b8;text-align:center;flex:1}
-.foot-link{font-size:13px;color:#3999a9;font-weight:500;transition:opacity .18s}
-.foot-link:hover{opacity:.7}
+══════════════════════════════ */
+footer{padding:36px 0;background:#060b12;border-top:1px solid rgba(255,255,255,.07)}
+.foot-grid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
+.foot-left{display:flex;flex-direction:column;gap:6px}
+.foot-tag{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#3999a9;margin-top:4px}
+.foot-center{font-size:13px;color:rgba(255,255,255,.3);text-align:center}
+.foot-right{text-align:right}
+.foot-link{font-size:13px;font-weight:500;color:rgba(255,255,255,.5);transition:color .18s}
+.foot-link:hover{color:#fff}
 
-/* ════════════════════════════
+/* ══════════════════════════════
    RESPONSIVE
-════════════════════════════ */
+══════════════════════════════ */
 @media(max-width:960px){
-  #hero{grid-template-columns:1fr;min-height:auto}
-  .hero-left{padding:100px 32px 56px;max-width:none}
-  .hero-right{height:480px}
+  #hero{min-height:auto;padding:80px 0 64px}
+  .hero-grid{grid-template-columns:1fr;gap:56px}
+  .hero-phone-wrap{justify-content:center}
   .calc-grid{grid-template-columns:1fr;gap:48px}
-  .sol-band{margin:0;grid-template-columns:1fr}
-  .sol-band .sol-visual{min-height:auto}
-  .sol-band.alt .sol-visual{order:0}
-  .contact-inner{grid-template-columns:1fr;gap:48px}
-  .metrics-inner{grid-template-columns:1fr 1fr}
-  .metric{padding:36px 28px}
-  .steps-head{grid-template-columns:1fr;gap:24px}
+  .prob-grid{grid-template-columns:1fr;gap:40px}
+  .sol-band-grid.cols55,.sol-band-grid.cols45{grid-template-columns:1fr;gap:44px}
+  .sol-phone{display:none}
+  .form-grid{grid-template-columns:1fr;gap:48px}
+  .metrics-row{grid-template-columns:1fr 1fr}
+  .metric{padding:48px 24px}
+  .foot-grid{grid-template-columns:1fr;text-align:center}
+  .foot-left{align-items:center}
+  .foot-right{text-align:center}
 }
 @media(max-width:680px){
   .hamburger{display:flex}
-  .nav-desktop{display:none}
-  .pb-item{grid-template-columns:80px 1fr}
-  .form-row{grid-template-columns:1fr}
-  .foot-inner{flex-direction:column;gap:12px;text-align:center}
-  .hero-wa-wrap{width:220px}
-  .sol-text{padding:48px 32px}
-  .sol-visual{padding:32px}
-  .metrics-inner{grid-template-columns:1fr 1fr}
-  .metric{padding:28px 20px}
-  .tl-bottom{padding-left:0}
-}
-@media(max-width:480px){
-  .wrap{padding:0 20px}
+  .nav-desktop-btn{display:none}
+  .hero-grid{grid-template-columns:1fr}
+  .hero-phone-wrap{display:none}
+  .prob-item{grid-template-columns:64px 1fr}
+  .f-row{grid-template-columns:1fr}
   .hero-ctas{flex-direction:column}
   .hero-ctas .btn{width:100%;justify-content:center}
-  .metrics-inner{grid-template-columns:1fr 1fr}
 }
-@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:480px){
+  .c{padding:0 20px}
+  .metrics-row{grid-template-columns:1fr 1fr}
+  .guar-inner{padding-left:24px}
+}
+@keyframes countup{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
 
-<!-- MOBILE DROPDOWN -->
-<div class="mobile-drop" id="mDrop">
-  <a href="#calc" onclick="mClose()">Calculadora</a>
-  <a href="#solution" onclick="mClose()">Solução</a>
-  <a href="#steps" onclick="mClose()">Como funciona</a>
-  <a href="#contact" onclick="mClose()" style="color:#3999a9">Começar agora →</a>
+<!-- ── MOBILE OVERLAY ── -->
+<div id="m-overlay">
+  <div class="m-ov-top">
+    <a href="#" class="logo">
+      <svg height="36" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#3999a9"/><path d="M10 9v18M10 9h9a4.5 4.5 0 0 1 0 9h-9M17 18l6.5 9" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="logo-txt"><span class="r" style="color:#fff">Reativa</span><span class="m">MED</span></span>
+    </a>
+  </div>
+  <div class="m-ov-links">
+    <a href="#calc" onclick="mClose()">Calculadora</a>
+    <a href="#solution" onclick="mClose()">A solução</a>
+    <a href="#how" onclick="mClose()">Como funciona</a>
+    <a href="#guarantee" onclick="mClose()">Garantia</a>
+  </div>
+  <div class="m-ov-bottom">
+    <a href="#form" onclick="mClose()" class="btn btn-teal btn-fw">Quero recuperar pacientes →</a>
+  </div>
 </div>
 
-<!-- ── NAVBAR ── -->
-<nav id="nav">
-  <div class="wrap">
-    <div class="nav-inner">
-      <!-- Logo -->
+<!-- ══════════════════════════════
+     NAVBAR
+══════════════════════════════ -->
+<nav id="nav" class="dark">
+  <div class="c">
+    <div class="nav-c">
       <a href="#" class="logo">
-        <svg height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="32" height="32" rx="6" fill="#3999a9"/>
-          <path d="M9 8v16M9 8h8a4 4 0 0 1 0 8H9M15 16l5.5 8" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="logo-word">Reativa<span class="m">MED</span></span>
+        <svg height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#3999a9"/><path d="M8.5 8v16M8.5 8h8a4 4 0 0 1 0 8h-8M15 16l5.5 8" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="logo-txt"><span class="r">Reativa</span><span class="m">MED</span></span>
       </a>
-      <!-- Desktop nav -->
-      <div class="nav-desktop" style="display:flex;align-items:center;gap:36px">
-        <a href="#calc" style="font-size:14px;font-weight:500;color:#4a6572;transition:color .18s" onmouseover="this.style.color='#0a0f14'" onmouseout="this.style.color='#4a6572'">Calculadora</a>
-        <a href="#solution" style="font-size:14px;font-weight:500;color:#4a6572;transition:color .18s" onmouseover="this.style.color='#0a0f14'" onmouseout="this.style.color='#4a6572'">Solução</a>
-        <a href="#steps" style="font-size:14px;font-weight:500;color:#4a6572;transition:color .18s" onmouseover="this.style.color='#0a0f14'" onmouseout="this.style.color='#4a6572'">Como funciona</a>
-        <a href="https://app.reativamed.pt" class="btn btn-teal" style="padding:10px 22px;font-size:14px">Entrar</a>
+      <div class="nav-desktop-btn">
+        <a href="https://app.reativamed.pt" id="nav-cta" class="nav-btn-dark">Entrar</a>
       </div>
       <button class="hamburger" id="ham" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 </nav>
 
-<!-- ════════════════════════════════════
+<!-- ══════════════════════════════
      HERO
-════════════════════════════════════ -->
+══════════════════════════════ -->
 <section id="hero">
-  <div class="hero-left wrap" style="padding-right:48px">
-    <span class="label fi">Para clínicas de estética · Portugal</span>
-    <h1 class="fi d1">
-      A tua clínica<br>
-      tem <span class="teal">dinheiro<br>parado</span> na<br>
-      base de dados.
-    </h1>
-    <p class="hero-sub fi d2">
-      Pacientes de estética que vieram uma vez e nunca mais voltaram. Recuperamo-los automaticamente via WhatsApp — sem esforço da tua parte.
-    </p>
-    <div class="hero-ctas fi d3">
-      <a href="#contact" class="btn btn-teal btn-lg">Quero recuperar pacientes →</a>
-      <a href="#solution" class="btn btn-outline btn-lg">Ver demonstração ↓</a>
-    </div>
-    <div class="hero-trust fi d4">
-      <span class="trust-line">Primeiros 30 dias gratuitos, sem cartão de crédito</span>
-      <span class="trust-line">Desenvolvido para clínicas de estética em Portugal</span>
-      <span class="trust-line">Primeiros resultados em menos de 7 dias</span>
-    </div>
-  </div>
-
-  <div class="hero-right">
-    <div class="geo-bg"></div>
-    <div class="geo-stripe"></div>
-    <div class="geo-accent1"></div>
-    <div class="geo-accent2"></div>
-    <div class="geo-accent3"></div>
-    <div class="hero-wa-wrap">
-      <div class="wa-mini">
-        <div class="wa-mini-head">
-          <div class="wa-mini-av">RM</div>
-          <div class="wa-mini-info">
-            Sofia · ReativaMED
-            <small>em linha agora</small>
-          </div>
+  <div class="hero-bg-glow"></div>
+  <div class="hero-bg-dots"></div>
+  <div class="c" style="position:relative;z-index:1;width:100%">
+    <div class="hero-grid">
+      <!-- Left copy -->
+      <div class="hero-copy">
+        <div class="pill pill-teal-dk">
+          <span class="pill-dot"></span>
+          Para clínicas de medicina estética · Portugal
         </div>
-        <div class="wa-mini-body">
-          <div class="bub">Olá Catarina! 👋 Notámos que já não a vemos há algum tempo. Temos uma promoção especial para o seu próximo tratamento.
-            <div class="bub-time">10:14</div>
-          </div>
-          <div class="bub out">Olá! Sim adorava marcar 😊
-            <div class="bub-time out">10:17 ✓✓</div>
-          </div>
-          <div class="bub">Óptimo! Tenho terça às 15h ou quinta às 10h. Qual prefere?
-            <div class="bub-time">10:17</div>
-          </div>
-          <div class="bub out">Terça às 15h perfeito!
-            <div class="bub-time out">10:19 ✓✓</div>
-          </div>
-          <div class="bub">✅ Marcado! Até terça-feira às 15h.
-            <div class="bub-time">10:19</div>
+        <h1>
+          A tua clínica<br>
+          tem <span class="hl">dinheiro<br>parado</span> na<br>
+          base de dados.
+        </h1>
+        <p class="hero-body" style="margin-top:24px">
+          Pacientes que fizeram tratamentos estéticos contigo e nunca mais voltaram. A ReativaMED contacta-os automaticamente via WhatsApp, gere toda a conversa com IA e marca a consulta — sem qualquer esforço da tua parte.
+        </p>
+        <div class="hero-ctas">
+          <a href="#form" class="btn btn-teal">Quero recuperar pacientes →</a>
+          <a href="#solution" class="btn btn-ghost-dark">Ver como funciona ↓</a>
+        </div>
+        <div class="hero-trust">✓ Primeiros 30 dias gratuitos &nbsp;·&nbsp; ✓ Sem compromisso &nbsp;·&nbsp; ✓ Resultados mensuráveis</div>
+      </div>
+      <!-- Right phone -->
+      <div class="hero-phone-wrap">
+        <div class="iphone">
+          <div class="iphone-notch"></div>
+          <div class="iphone-screen">
+            <div class="wa-bar">
+              <div class="wa-bar-av">CE</div>
+              <div class="wa-bar-info">
+                <p>Clínica Exemplo</p>
+                <small><span class="wa-online"></span> online agora</small>
+              </div>
+            </div>
+            <div class="wa-body">
+              <div class="wa-date">Hoje, 10:23</div>
+              <div class="w w-in">
+                Olá Ana! 👋 É a Clínica Exemplo.<br>
+                Já passou algum tempo desde a sua última visita e gostaríamos de a receber de volta. Tem disponibilidade esta semana?
+                <div class="w-meta">10:23</div>
+              </div>
+              <div class="w w-out">
+                Olá! Sim, adorava marcar 😊
+                <div class="w-meta out">10:31 <span class="tick"><svg viewBox="0 0 16 10" fill="none"><path d="M1 5l4 4L14 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+              </div>
+              <div class="w w-in">
+                Óptimo! Tenho disponível terça às 15h ou quinta às 10h. Qual prefere?
+                <div class="w-meta">10:31</div>
+              </div>
+              <div class="w w-out">
+                Terça às 15h perfeito!
+                <div class="w-meta out">10:32 <span class="tick"><svg viewBox="0 0 16 10" fill="none"><path d="M1 5l4 4L14 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+              </div>
+              <div class="w w-in">
+                Marcado! ✅ Consulta confirmada para terça-feira às 15h00. Até já, Ana!
+                <div class="w-meta">10:32</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+<!-- Sentinel for navbar -->
+<div id="hero-end"></div>
 
-<!-- ════════════════════════════════════
+<!-- ══════════════════════════════
      CALCULATOR
-════════════════════════════════════ -->
+══════════════════════════════ -->
 <section id="calc">
-  <div class="wrap">
+  <div class="c">
     <div class="calc-grid">
-      <div class="calc-left fi">
-        <span class="label" style="display:block;margin-bottom:16px">Calculadora de ROI</span>
+      <div class="fu">
+        <span class="lbl">Calculadora de receita</span>
         <h2>Quanto vale a tua<br>base de dados inactiva?</h2>
-        <p style="margin-top:20px;margin-bottom:0">A maioria das clínicas de estética tem 200 a 800 pacientes que fizeram botox, fillers ou laser e nunca mais voltaram. Calcula quanto podes recuperar.</p>
+        <p style="margin-top:20px">A maioria das clínicas de medicina estética tem centenas de pacientes que fizeram pelo menos uma consulta e nunca mais voltaram. Cada um desses pacientes representa receita que pode ser recuperada.</p>
+        <div class="calc-stat" style="margin-top:32px">
+          Em média, uma clínica recupera €2.800 no primeiro mês.
+          <small>Com base nos resultados das clínicas clientes da ReativaMED</small>
+        </div>
       </div>
-      <div class="calc-card fi d2">
-        <!-- Slider -->
-        <div class="cf-group">
-          <div class="cf-label">
-            Pacientes inativos
-            <span id="pVal">300</span>
+      <div class="fu d2">
+        <div class="calc-card">
+          <!-- Slider -->
+          <div class="cf-g">
+            <div class="cf-lbl">
+              Pacientes inativos na tua base de dados
+              <span class="val" id="pv">300</span>
+            </div>
+            <input type="range" id="rng" min="50" max="2000" value="300" step="10">
+            <div class="range-ends"><span>50</span><span>2.000</span></div>
           </div>
-          <input type="range" id="slP" min="50" max="2000" value="300" step="10">
-          <div class="range-ends"><span>50</span><span>2.000</span></div>
-        </div>
-        <!-- Ticket -->
-        <div class="cf-group">
-          <div class="cf-label">Ticket médio por consulta (€)</div>
-          <input class="cf-input" type="number" id="slT" value="100" min="20" max="2000" step="5" placeholder="Ex: 150€ para botox">
-        </div>
-        <!-- Taxa (locked) -->
-        <div class="cf-group">
-          <div class="cf-label">
-            Taxa de reactivação
-            <span class="lock-tag">🔒 Média real 10%</span>
+          <!-- Ticket -->
+          <div class="cf-g">
+            <div class="cf-lbl">Valor médio de uma consulta (€)</div>
+            <input class="cf-input" type="number" id="ticket" value="100" min="20" max="5000" step="10" placeholder="Ex: 100€">
           </div>
-          <input class="cf-input" type="number" value="10" disabled>
-          <p style="font-size:12px;color:#94a3b8;margin-top:6px;margin-bottom:0">Baseado na nossa média real com clínicas de estética</p>
-        </div>
-        <!-- Result -->
-        <div class="cf-result">
-          <div class="cf-result-label">Receita potencial estimada</div>
-          <div class="cf-result-num" id="rVal">€30.000</div>
-          <div class="cf-result-desc" id="rDesc">Se recuperarmos <strong>30 pacientes</strong> (10% de 300), com ticket médio de <strong>€100</strong> por consulta.</div>
-          <a href="#contact" class="btn btn-teal" style="width:100%;justify-content:center">Quero recuperar este valor →</a>
+          <!-- Rate locked -->
+          <div class="cf-g">
+            <div class="cf-lbl">
+              Taxa de reactivação
+              <span class="lock">Média real: 10%</span>
+            </div>
+            <input class="cf-input" type="number" value="10" disabled>
+            <div class="cf-hint">Baseado na nossa média real com clínicas clientes. A taxa varia entre 8% e 14%.</div>
+          </div>
+          <!-- Result -->
+          <div class="cf-result">
+            <div class="cf-r-lbl">Receita potencial recuperável</div>
+            <div class="cf-r-num" id="rv">€30.000</div>
+            <div class="cf-r-sub" id="rsub">Se recuperarmos 10% de 300 pacientes (30 consultas) ao valor de €100 cada.</div>
+            <a href="#form" class="btn btn-teal btn-fw">Quero recuperar este valor →</a>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ════════════════════════════════════
+<!-- ══════════════════════════════
      PROBLEM
-════════════════════════════════════ -->
-<section id="problem" style="padding:100px 0;background:#f0f9fa">
-  <div class="wrap">
-    <div class="problem-header fi">
-      <h2>Não é falta de pacientes.<br>É falta de seguimento.</h2>
-      <p style="margin-top:20px">As clínicas de estética perdem até 60% dos pacientes após a primeira consulta — não por insatisfação, mas porque ninguém os foi buscar.</p>
-    </div>
-    <div class="problem-list">
-      <div class="pb-item fi d1">
-        <div class="pb-num">01</div>
-        <div class="pb-content">
-          <h3>Pacientes de botox e laser que fizeram uma consulta e desapareceram</h3>
-          <p>Foram uma vez, ficaram satisfeitos, e a vida passou. Falta um sistema que os vá buscar no momento certo — antes de irem à concorrência para o retoque.</p>
-        </div>
+══════════════════════════════ -->
+<section id="problem">
+  <div class="c">
+    <div class="prob-grid">
+      <div class="fu">
+        <span class="lbl">O problema</span>
+        <h2>Não é falta de pacientes.<br>É falta de seguimento.</h2>
+        <p style="margin-top:20px">As clínicas de medicina estética perdem até 60% dos pacientes após a primeira consulta — não por insatisfação, mas porque ninguém os foi buscar.</p>
       </div>
-      <div class="pb-item fi d2">
-        <div class="pb-num">02</div>
-        <div class="pb-content">
-          <h3>Leads do Instagram que não recebem resposta rápida e vão à concorrência</h3>
-          <p>40% das mensagens chegam fora do horário de trabalho. A clínica que responde primeiro ganha o paciente. A segunda perde-o para sempre.</p>
+      <div class="prob-right">
+        <div class="prob-item fu d1">
+          <div class="prob-num">01</div>
+          <div class="prob-text">
+            <h3>Pacientes que não voltam</h3>
+            <p>A maioria dos pacientes inativos não foi à concorrência. Simplesmente não houve seguimento. Um contacto no momento certo traz-os de volta.</p>
+          </div>
         </div>
-      </div>
-      <div class="pb-item fi d3">
-        <div class="pb-num">03</div>
-        <div class="pb-content">
-          <h3>A tua equipa demasiado ocupada para fazer follow-up manual</h3>
-          <p>Confirmar consultas, responder a dúvidas sobre preços, gerir remarcações — são horas por semana que a tua equipa não tem. E que um sistema automático pode assumir.</p>
+        <div class="prob-item fu d2">
+          <div class="prob-num">02</div>
+          <div class="prob-text">
+            <h3>Leads perdidos fora do horário</h3>
+            <p>Quando alguém manda mensagem às 22h e não recebe resposta até amanhã, já escolheu outra clínica. A rapidez de resposta é o factor decisivo.</p>
+          </div>
+        </div>
+        <div class="prob-item fu d3">
+          <div class="prob-num">03</div>
+          <div class="prob-text">
+            <h3>Tempo perdido em tarefas repetitivas</h3>
+            <p>Confirmar consultas, responder às mesmas perguntas, fazer follow-up manual — são horas por semana que a tua equipa gasta sem gerar receita.</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ════════════════════════════════════
+<!-- ══════════════════════════════
      SOLUTION
-════════════════════════════════════ -->
+══════════════════════════════ -->
 <section id="solution">
-  <div style="padding:100px 0 0">
-    <div class="wrap">
-      <div class="solution-head fi">
-        <h2>Dois sistemas.<br>Um resultado.</h2>
-      </div>
+  <div class="sol-intro">
+    <div class="c">
+      <h2 class="fu">Dois sistemas. Um resultado: mais consultas.</h2>
+      <p class="fu d1">A ReativaMED funciona em paralelo — um sistema vai buscar os pacientes que partiram, o outro garante que nunca perdes os que chegam.</p>
     </div>
+  </div>
 
-    <!-- Band 1: Motor 1 -->
-    <div class="sol-band">
-      <div class="sol-text fi">
-        <span class="sol-tag">Motor 1</span>
-        <div class="sol-title">Vai buscar<br>os que partiram</div>
-        <p class="sol-desc">Importas a lista de pacientes de botox, fillers ou laser que não voltaram. A Sofia contacta cada um via WhatsApp com uma mensagem personalizada, gere a conversa e marca a consulta directamente na tua agenda.</p>
-        <ul class="sol-list">
-          <li>Segmentação automática por tratamento e tempo inactivo</li>
-          <li>Mensagens personalizadas com nome e último procedimento</li>
-          <li>A IA gere toda a conversa e agenda sem intervenção humana</li>
-          <li>Confirmação automática 24h antes da consulta</li>
-        </ul>
-      </div>
-      <div class="sol-visual fi d2">
-        <div class="wa-full">
-          <div class="wa-full-head">
-            <div class="wa-full-av">RM</div>
-            <div class="wa-full-info">
-              <p>Sofia · Clínica X</p>
-              <small>em linha agora</small>
-            </div>
-          </div>
-          <div class="wa-full-body">
-            <div class="wa-date">Hoje, 10h14</div>
-            <div class="wb in">Olá Maria! 👋 É a Clínica X. Notámos que já não a vemos há algum tempo. Temos uma promoção especial para o seu próximo tratamento de botox. Tem disponibilidade esta semana?
-              <div class="wb-t">10:14</div>
-            </div>
-            <div class="wb out">Olá! Sim, adorava marcar 😊
-              <div class="wb-t out">
-                10:16
-                <svg viewBox="0 0 16 11" fill="none"><path d="M1 5.5l4 4L14 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5.5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-            </div>
-            <div class="wb in">Óptimo! Tenho disponível terça às 15h ou quinta às 10h. Qual prefere?
-              <div class="wb-t">10:16</div>
-            </div>
-            <div class="wb out">Terça às 15h perfeito!
-              <div class="wb-t out">
-                10:18
-                <svg viewBox="0 0 16 11" fill="none"><path d="M1 5.5l4 4L14 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5.5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-            </div>
-            <div class="wb in">Marcado! ✅ Consulta confirmada para terça-feira às 15h00. Até já! 😊
-              <div class="wb-t">10:18</div>
-            </div>
-          </div>
+  <!-- Band A — Motor 1 -->
+  <div class="sol-band sol-band-a">
+    <div class="c">
+      <div class="sol-band-grid cols55">
+        <div class="fu">
+          <span class="motor-tag">Motor 1 — Reactivação Outbound</span>
+          <div class="motor-title">Vai buscar os que partiram</div>
+          <p class="motor-body">Importas a lista de pacientes inativos. A plataforma segmenta automaticamente por tempo desde a última visita e envia mensagens personalizadas via WhatsApp — com o nome do paciente, o último tratamento e uma mensagem no tom da tua clínica. O sistema gere toda a conversa e marca a consulta na tua agenda.</p>
+          <ul class="motor-bullets">
+            <li>Segmentação automática por tempo de inactividade</li>
+            <li>Mensagens personalizadas com histórico do paciente</li>
+            <li>Agendamento directo no Google Calendar</li>
+          </ul>
         </div>
-      </div>
-    </div>
-
-    <!-- Band 2: Motor 2 -->
-    <div class="sol-band alt">
-      <div class="sol-text fi">
-        <span class="sol-tag">Motor 2</span>
-        <div class="sol-title">Nunca perde<br>os que chegam</div>
-        <p class="sol-desc">Qualquer mensagem no WhatsApp da clínica — a qualquer hora — tem resposta em menos de 30 segundos. A Sofia qualifica o interesse, responde sobre tratamentos e marca directamente na agenda.</p>
-        <ul class="sol-list">
-          <li>Resposta garantida em menos de 30 segundos, 24/7</li>
-          <li>Qualifica o interesse e explica preços e procedimentos</li>
-          <li>Agenda directamente no Google Calendar da clínica</li>
-          <li>Detecta e confirma respostas de pacientes automaticamente</li>
-        </ul>
-      </div>
-      <div class="sol-visual fi d2">
-        <div class="dash">
-          <div class="dash-hd">
-            <span class="dash-hd-t">Motor 2 · Sofia AI</span>
-            <span class="dash-live">ao vivo</span>
-          </div>
-          <div class="dash-stats">
-            <div class="ds"><div class="ds-n">247</div><div class="ds-l">Conversas este mês</div></div>
-            <div class="ds"><div class="ds-n">38</div><div class="ds-l">Consultas marcadas</div></div>
-            <div class="ds"><div class="ds-n" style="font-size:18px">&lt;30s</div><div class="ds-l">Tempo médio de resposta</div></div>
-            <div class="ds"><div class="ds-n">24/7</div><div class="ds-l">Disponibilidade total</div></div>
-          </div>
-          <div class="dash-chart">
-            <div class="dash-chart-label">Consultas marcadas — últimos 7 dias</div>
-            <div class="bars">
-              <div class="bar" style="height:30%"></div>
-              <div class="bar md" style="height:48%"></div>
-              <div class="bar" style="height:36%"></div>
-              <div class="bar md" style="height:62%"></div>
-              <div class="bar hi" style="height:80%"></div>
-              <div class="bar hi" style="height:72%"></div>
-              <div class="bar hi" style="height:100%"></div>
+        <div class="sol-phone fu d2">
+          <div class="iphone-sm iphone">
+            <div class="iphone-notch"></div>
+            <div class="iphone-screen">
+              <div class="wa-bar">
+                <div class="wa-bar-av" style="font-size:10px">CE</div>
+                <div class="wa-bar-info">
+                  <p>Clínica Exemplo</p>
+                  <small><span class="wa-online"></span> online</small>
+                </div>
+              </div>
+              <div class="wa-body">
+                <div class="wa-date">Hoje, 14:07</div>
+                <div class="w w-in" style="font-size:12px">
+                  Olá Marta! 👋 É a Clínica Exemplo. Já faz algum tempo que não a vemos e queríamos saber se estava tudo bem. Temos um espaço disponível esta semana — teria interesse?
+                  <div class="w-meta">14:07</div>
+                </div>
+                <div class="w w-out" style="font-size:12px">
+                  Sim! Que tratamentos têm disponíveis?
+                  <div class="w-meta out">14:15 <span class="tick"><svg viewBox="0 0 16 10" fill="none"><path d="M1 5l4 4L14 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+                </div>
+                <div class="w w-in" style="font-size:12px">
+                  Temos os tratamentos que fez anteriormente e algumas novidades! Prefere quinta às 11h ou sexta às 16h?
+                  <div class="w-meta">14:16</div>
+                </div>
+                <div class="w w-out" style="font-size:12px">
+                  Quinta às 11h! 👍
+                  <div class="w-meta out">14:18 <span class="tick"><svg viewBox="0 0 16 10" fill="none"><path d="M1 5l4 4L14 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+                </div>
+                <div class="w w-in" style="font-size:12px">
+                  Marcado! ✅ Quinta-feira às 11h. Até já, Marta!
+                  <div class="w-meta">14:18</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</section>
 
-<!-- ════════════════════════════════════
-     STEPS / TIMELINE
-════════════════════════════════════ -->
-<section id="steps">
-  <div class="wrap">
-    <div class="steps-head fi">
-      <h2>Da lista de pacientes às consultas marcadas.</h2>
-      <div class="steps-head-right">
-        <p>Sem tecnicidades, sem formação da equipa. Pões o sistema a funcionar em menos de 48 horas.</p>
+  <!-- Band B — Motor 2 -->
+  <div class="sol-band sol-band-b">
+    <div class="c">
+      <div class="sol-band-grid cols45">
+        <div class="sol-phone fu">
+          <div class="dash-mock">
+            <div class="dash-head">
+              <span class="dash-head-t">Assistente IA</span>
+              <span class="dash-live">ao vivo</span>
+            </div>
+            <div class="dash-stats">
+              <div class="ds"><div class="ds-n">312</div><div class="ds-l">Conversas este mês</div></div>
+              <div class="ds"><div class="ds-n">47</div><div class="ds-l">Consultas marcadas</div></div>
+              <div class="ds"><div class="ds-n" style="font-size:18px">&lt;30s</div><div class="ds-l">Tempo médio resposta</div></div>
+              <div class="ds"><div class="ds-n">24/7</div><div class="ds-l">Disponibilidade</div></div>
+            </div>
+            <div class="dash-bars-wrap">
+              <div class="dash-bars-lbl">Consultas marcadas — últimos 7 dias</div>
+              <div class="dash-bars">
+                <div class="db" style="height:30%"></div>
+                <div class="db md" style="height:50%"></div>
+                <div class="db" style="height:38%"></div>
+                <div class="db md" style="height:65%"></div>
+                <div class="db hi" style="height:82%"></div>
+                <div class="db hi" style="height:74%"></div>
+                <div class="db hi" style="height:100%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="fu d2">
+          <span class="motor-tag">Motor 2 — Recepcionista IA 24/7</span>
+          <div class="motor-title">Nunca perde os que chegam</div>
+          <p class="motor-body">Qualquer mensagem que chegue à clínica via WhatsApp — a qualquer hora do dia ou da noite — recebe resposta em menos de 30 segundos. O assistente de IA, com o nome que a tua clínica escolher, qualifica o lead, responde às dúvidas mais comuns e marca a consulta directamente na agenda.</p>
+          <div class="motor-note">
+            <p>O assistente de IA usa o nome que a tua clínica definir — pode chamar-se Sofia, Ana, ou qualquer outro nome. É completamente personalizável.</p>
+          </div>
+          <ul class="motor-bullets">
+            <li>Resposta automática em menos de 30 segundos</li>
+            <li>Qualificação automática de leads</li>
+            <li>Disponível 24 horas, 7 dias por semana</li>
+          </ul>
+        </div>
       </div>
     </div>
+  </div>
+</section>
 
+<!-- ══════════════════════════════
+     HOW IT WORKS
+══════════════════════════════ -->
+<section id="how">
+  <div class="c">
+    <div class="how-top fu">
+      <h2>Da lista de pacientes<br>às consultas marcadas.</h2>
+      <p>O processo completo demora menos de 48 horas.</p>
+    </div>
     <div class="timeline">
-      <div class="tl-item fi d1">
+      <div class="tl-item fu d1">
         <div class="tl-dot"></div>
-        <div class="tl-num">Passo 01</div>
+        <div class="tl-n">Passo 01</div>
         <h3>Exportas a lista de pacientes do teu software</h3>
-        <p>Um ficheiro CSV simples do teu software de gestão — nome, telefone, último tratamento. Nós tratamos da importação, limpeza e segmentação automática por tipo de procedimento e tempo inactivo.</p>
+        <p>Exportas um ficheiro CSV com os pacientes que não voltaram. Nós tratamos de tudo o resto — importação, segmentação por historial de visitas e personalização de cada mensagem.</p>
       </div>
-      <div class="tl-item fi d2">
+      <div class="tl-item fu d2">
         <div class="tl-dot"></div>
-        <div class="tl-num">Passo 02</div>
-        <h3>A Sofia entra em contacto automaticamente</h3>
-        <p>O sistema começa a enviar mensagens personalizadas via WhatsApp. Cada paciente recebe uma mensagem com o seu nome e referência ao seu último tratamento. A Sofia responde, qualifica e agenda — tudo sem a tua intervenção.</p>
+        <div class="tl-n">Passo 02</div>
+        <h3>O sistema entra em acção automaticamente</h3>
+        <p>A plataforma segmenta os pacientes, envia mensagens personalizadas via WhatsApp e gere todas as conversas com IA — respondendo a dúvidas, gerindo objecções e marcando consultas, tudo sem qualquer intervenção da tua parte.</p>
       </div>
-      <div class="tl-item fi d3">
+      <div class="tl-item fu d3">
         <div class="tl-dot"></div>
-        <div class="tl-num">Passo 03</div>
-        <h3>Vês as consultas a aparecer na agenda</h3>
-        <p>As consultas marcadas aparecem directamente no Google Calendar da clínica. No dashboard vês em tempo real quantos pacientes responderam, quantas consultas foram marcadas e quanto foi recuperado.</p>
+        <div class="tl-n">Passo 03</div>
+        <h3>Acompanhas tudo no dashboard em tempo real</h3>
+        <p>Vês quantas mensagens foram enviadas, quantas responderam e quantas consultas foram marcadas — com a receita estimada recuperada actualizada em tempo real no teu painel.</p>
       </div>
     </div>
-    <div class="tl-bottom fi">→ O processo completo demora menos de 48 horas.</div>
   </div>
 </section>
 
-<!-- ════════════════════════════════════
+<!-- ══════════════════════════════
      METRICS
-════════════════════════════════════ -->
+══════════════════════════════ -->
 <section id="metrics">
-  <div class="wrap">
-    <div class="metrics-inner fi">
+  <div class="c">
+    <div class="metrics-row fu">
       <div class="metric">
-        <div class="metric-n" data-target="30" data-suffix="+">0+</div>
-        <div class="metric-d">consultas recuperadas<br>no primeiro mês</div>
+        <div class="m-n" data-type="up" data-to="30" data-suffix="+">30+</div>
+        <div class="m-lbl">consultas recuperadas<br>no primeiro mês</div>
       </div>
       <div class="metric">
-        <div class="metric-n" data-static="&lt;30s">&lt;30s</div>
-        <div class="metric-d">tempo de resposta<br>da Sofia</div>
+        <div class="m-n" data-type="down" data-from="60" data-to="30">&lt; 30s</div>
+        <div class="m-lbl">tempo de resposta<br>do assistente IA</div>
       </div>
       <div class="metric">
-        <div class="metric-n" data-static="24/7">24/7</div>
-        <div class="metric-d">sem intervenção<br>humana</div>
+        <div class="m-n" data-type="static">24/7</div>
+        <div class="m-lbl">disponibilidade<br>sem intervenção humana</div>
       </div>
       <div class="metric">
-        <div class="metric-n" data-static="0h">0h</div>
-        <div class="metric-d">trabalho adicional<br>para a tua equipa</div>
+        <div class="m-n" data-type="static">0h</div>
+        <div class="m-lbl">trabalho adicional<br>para a tua equipa</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ════════════════════════════════════
+<!-- ══════════════════════════════
      GUARANTEE
-════════════════════════════════════ -->
+══════════════════════════════ -->
 <section id="guarantee">
-  <div class="wrap">
-    <div class="guarantee-inner fi">
-      <span class="label">Garantia de resultados</span>
-      <h2>Se não funcionar,<br>não pagas.</h2>
-      <p>Se nos primeiros 30 dias não marcares pelo menos 10 consultas de estética através do sistema, não cobras o segundo mês. Sem condições escondidas, sem letras pequenas.</p>
-      <p class="guarantee-note">Não temos medo de garantir resultados porque sabemos que o sistema funciona — e temos os números para o provar.</p>
-      <a href="#contact" class="btn btn-teal btn-lg" style="margin-top:36px">Começar com garantia de resultados →</a>
+  <div class="c">
+    <div class="guar-inner fu">
+      <span class="lbl">Garantia</span>
+      <h2 style="font-size:clamp(40px,5.5vw,64px)">Se não funcionar,<br>não pagas.</h2>
+      <p class="guar-body">Se nos primeiros 30 dias não marcares pelo menos 10 consultas através da ReativaMED, não cobras o segundo mês. Sem asteriscos. Sem condições escondidas. Sem letra pequena.</p>
+      <p class="guar-line">Não temos medo de garantir porque sabemos que o sistema funciona.</p>
+      <a href="#form" class="btn btn-teal btn-lg">Quero começar com garantia →</a>
     </div>
   </div>
 </section>
 
-<!-- ════════════════════════════════════
-     CONTACT FORM
-════════════════════════════════════ -->
-<section id="contact">
-  <div class="wrap">
-    <div class="contact-inner">
-      <div class="contact-left fi">
-        <span class="label">Começa agora</span>
-        <h2 style="color:#fff">Os primeiros 30 dias são gratuitos.</h2>
-        <p style="color:rgba(255,255,255,.75);margin-top:16px">Sem compromisso. Sem cartão de crédito. Implementamos o sistema, mostramos os resultados — depois decides se faz sentido continuar.</p>
+<!-- ══════════════════════════════
+     FORM
+══════════════════════════════ -->
+<section id="form">
+  <div class="c">
+    <div class="form-grid">
+      <!-- Left -->
+      <div class="fu">
+        <h2>Começa hoje.<br>Os primeiros 30 dias<br>são gratuitos.</h2>
+        <p style="margin-top:18px">Sem compromisso. Sem cartão de crédito. Instalamos tudo e acompanhamos os primeiros resultados contigo.</p>
+        <div class="form-trust" style="margin-top:32px">
+          <div class="form-trust-item">Setup completo em menos de 48 horas</div>
+          <div class="form-trust-item">Garantia de 10 consultas no primeiro mês</div>
+          <div class="form-trust-item">Suporte dedicado durante os primeiros 30 dias</div>
+        </div>
       </div>
-      <div class="contact-form-wrap fi d2">
-        <!-- Success -->
-        <div class="success-box" id="sBox">
-          <div class="check-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <!-- Right card -->
+      <div class="fu d2">
+        <div class="form-card">
+          <!-- Success state -->
+          <div class="form-success" id="fSuccess">
+            <div class="fs-check">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#3999a9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Obrigado!</h3>
+            <p>Entraremos em contacto nas próximas 24 horas para agendar a tua demonstração gratuita.</p>
           </div>
-          <h3>Recebemos o teu pedido!</h3>
-          <p>Entraremos em contacto em menos de 24 horas para agendar a tua demonstração gratuita.</p>
+          <!-- Form -->
+          <form id="lForm" novalidate>
+            <div class="f-row">
+              <div class="ff">
+                <label for="fn">Nome completo</label>
+                <input class="fi" type="text" id="fn" name="nome" placeholder="Ana Silva" required autocomplete="name">
+              </div>
+              <div class="ff">
+                <label for="fc">Nome da clínica</label>
+                <input class="fi" type="text" id="fc" name="clinica" placeholder="Clínica Exemplo" required>
+              </div>
+            </div>
+            <div class="f-row">
+              <div class="ff">
+                <label for="ft">Telefone (WhatsApp)</label>
+                <input class="fi" type="tel" id="ft" name="tel" placeholder="+351 912 345 678" required autocomplete="tel">
+              </div>
+              <div class="ff">
+                <label for="fe">Email profissional</label>
+                <input class="fi" type="email" id="fe" name="email" placeholder="ana@clinica.pt" required autocomplete="email">
+              </div>
+            </div>
+            <button type="submit" class="btn-submit" id="subBtn">
+              <span id="subTxt">Quero recuperar os meus pacientes →</span>
+              <span id="subSpin" style="display:none;align-items:center;gap:8px">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="animation:spin .75s linear infinite;display:block"><circle cx="9" cy="9" r="7" stroke="rgba(255,255,255,.25)" stroke-width="2"/><path d="M9 2a7 7 0 0 1 7 7" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+                A enviar...
+              </span>
+            </button>
+            <div class="form-divider">Ou preferes falar directamente?</div>
+            <a href="https://wa.me/351XXXXXXXXX" target="_blank" rel="noopener" class="btn-wa">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+              Falar pelo WhatsApp
+            </a>
+            <p class="privacy">Os teus dados são usados apenas para te contactarmos. Nunca partilhamos com terceiros.</p>
+          </form>
         </div>
-        <!-- Form -->
-        <form id="lForm" novalidate>
-          <div class="form-row">
-            <div class="ff">
-              <label for="fn">Nome completo</label>
-              <input class="fi-input" type="text" id="fn" name="nome" placeholder="Ana Silva" required autocomplete="name">
-            </div>
-            <div class="ff">
-              <label for="fc">Nome da clínica</label>
-              <input class="fi-input" type="text" id="fc" name="clinica" placeholder="Clínica Exemplo" required>
-            </div>
-            <div class="ff">
-              <label for="ft">Telefone (WhatsApp)</label>
-              <input class="fi-input" type="tel" id="ft" name="telefone" placeholder="+351 912 345 678" required autocomplete="tel">
-            </div>
-            <div class="ff">
-              <label for="fe">Email</label>
-              <input class="fi-input" type="email" id="fe" name="email" placeholder="ana@clinica.pt" required autocomplete="email">
-            </div>
-          </div>
-          <button type="submit" class="btn-submit" id="subBtn">
-            <span id="subTxt">Quero recuperar os meus pacientes →</span>
-            <span id="subSpin" style="display:none;align-items:center;gap:8px">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="animation:spin .75s linear infinite"><circle cx="9" cy="9" r="7" stroke="rgba(57,153,169,.3)" stroke-width="2"/><path d="M9 2a7 7 0 0 1 7 7" stroke="#3999a9" stroke-width="2" stroke-linecap="round"/></svg>
-              A enviar...
-            </span>
-          </button>
-        </form>
-        <div class="form-wa">
-          Ou fala connosco directamente →
-          <a href="https://wa.me/351XXXXXXXXX" target="_blank" rel="noopener">WhatsApp</a>
-        </div>
-        <p class="privacy">Os teus dados são usados exclusivamente para te contactarmos. Nunca partilhamos com terceiros.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── FOOTER ── -->
+<!-- ══════════════════════════════
+     FOOTER
+══════════════════════════════ -->
 <footer>
-  <div class="wrap">
-    <div class="foot-inner">
-      <a href="#" class="logo">
-        <svg height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="6" fill="#3999a9"/><path d="M9 8v16M9 8h8a4 4 0 0 1 0 8H9M15 16l5.5 8" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span class="logo-word">Reativa<span class="m">MED</span></span>
-      </a>
-      <span class="foot-copy">© 2026 ReativaMED · Smart Patient Recovery · Para clínicas de estética</span>
-      <a href="https://app.reativamed.pt" class="foot-link">Entrar na plataforma →</a>
+  <div class="c">
+    <div class="foot-grid">
+      <div class="foot-left">
+        <a href="#" class="logo">
+          <svg height="28" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#3999a9"/><path d="M8.5 8v16M8.5 8h8a4 4 0 0 1 0 8h-8M15 16l5.5 8" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="logo-txt"><span class="r" style="color:#fff">Reativa</span><span class="m">MED</span></span>
+        </a>
+        <span class="foot-tag">Smart Patient Recovery</span>
+      </div>
+      <div class="foot-center">© 2026 ReativaMED · Para clínicas de medicina estética</div>
+      <div class="foot-right">
+        <a href="https://app.reativamed.pt" class="foot-link">Entrar na plataforma →</a>
+      </div>
     </div>
   </div>
 </footer>
 
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
 <script>
-// ── MOBILE MENU ──────────────────────────────────────────
+// ── NAVBAR ──────────────────────────────────────────────────
+const nav = document.getElementById('nav');
+const navCta = document.getElementById('nav-cta');
+const heroEnd = document.getElementById('hero-end');
+
+const navObs = new IntersectionObserver(([e]) => {
+  const onHero = e.isIntersecting;
+  nav.className = onHero ? 'dark' : 'light';
+  if (navCta) {
+    navCta.className = onHero ? 'nav-btn-dark' : 'nav-btn-light';
+  }
+}, {threshold: 0});
+navObs.observe(heroEnd);
+
+// ── MOBILE MENU ─────────────────────────────────────────────
 const ham = document.getElementById('ham');
-const mDrop = document.getElementById('mDrop');
+const mOv = document.getElementById('m-overlay');
 ham.addEventListener('click', () => {
   ham.classList.toggle('open');
-  mDrop.classList.toggle('open');
-  document.body.style.overflow = mDrop.classList.contains('open') ? 'hidden' : '';
+  mOv.classList.toggle('open');
+  document.body.style.overflow = mOv.classList.contains('open') ? 'hidden' : '';
 });
 function mClose() {
   ham.classList.remove('open');
-  mDrop.classList.remove('open');
+  mOv.classList.remove('open');
   document.body.style.overflow = '';
 }
 
-// ── SMOOTH SCROLL ────────────────────────────────────────
+// ── SMOOTH SCROLL ───────────────────────────────────────────
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     const id = a.getAttribute('href');
@@ -746,93 +849,126 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     const el = document.querySelector(id);
     if (!el) return;
     e.preventDefault();
-    const top = el.getBoundingClientRect().top + window.scrollY - 70;
-    window.scrollTo({top, behavior:'smooth'});
+    el.scrollIntoView({behavior:'smooth', block:'start'});
+    const offset = 72;
+    const y = el.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({top: y, behavior:'smooth'});
   });
 });
 
-// ── CALCULATOR ──────────────────────────────────────────
-const slP = document.getElementById('slP');
-const slT = document.getElementById('slT');
-const pVal = document.getElementById('pVal');
-const rVal = document.getElementById('rVal');
-const rDesc = document.getElementById('rDesc');
+// ── CALCULATOR ──────────────────────────────────────────────
+const rng = document.getElementById('rng');
+const ticket = document.getElementById('ticket');
+const pvEl = document.getElementById('pv');
+const rvEl = document.getElementById('rv');
+const rsubEl = document.getElementById('rsub');
+let pulseTimer;
 
 function fmtEur(n) {
-  return '€' + n.toLocaleString('pt-PT', {maximumFractionDigits:0});
+  return '€' + Math.round(n).toLocaleString('pt-PT');
 }
-function calc() {
-  const p = parseInt(slP.value) || 300;
-  const t = parseFloat(slT.value) || 100;
-  const recovered = Math.round(p * 0.1);
-  const total = recovered * t;
-  pVal.textContent = p.toLocaleString('pt-PT');
-  rVal.textContent = fmtEur(total);
-  rDesc.innerHTML = `Se recuperarmos <strong>${recovered} pacientes</strong> (10% de ${p.toLocaleString('pt-PT')}), com ticket médio de <strong>${fmtEur(t)}</strong> por consulta.`;
+function calcUpdate() {
+  const p = parseInt(rng.value) || 300;
+  const t = parseFloat(ticket.value) || 100;
+  const rate = 0.1;
+  const rec = Math.round(p * rate);
+  const total = rec * t;
+  pvEl.textContent = p.toLocaleString('pt-PT');
+  rvEl.textContent = fmtEur(total);
+  rsubEl.textContent = `Se recuperarmos 10% de ${p.toLocaleString('pt-PT')} pacientes (${rec} consultas) ao valor de ${fmtEur(t)} cada.`;
+  // pulse animation
+  rvEl.classList.remove('pulse');
+  clearTimeout(pulseTimer);
+  void rvEl.offsetWidth;
+  rvEl.classList.add('pulse');
+  pulseTimer = setTimeout(() => rvEl.classList.remove('pulse'), 200);
 }
-slP.addEventListener('input', calc);
-slT.addEventListener('input', calc);
-calc();
+rng.addEventListener('input', calcUpdate);
+ticket.addEventListener('input', calcUpdate);
 
-// ── INTERSECTION OBSERVER (fade-up) ─────────────────────
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('v'); io.unobserve(e.target); } });
-}, {threshold: 0.1, rootMargin: '0px 0px -32px 0px'});
-document.querySelectorAll('.fi').forEach(el => io.observe(el));
+// ── FADE-UP OBSERVER ────────────────────────────────────────
+const fuObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); fuObs.unobserve(e.target); } });
+}, {threshold: 0.1, rootMargin: '0px 0px -28px 0px'});
+document.querySelectorAll('.fu').forEach(el => fuObs.observe(el));
 
-// ── COUNTER ANIMATION ───────────────────────────────────
-const cio = new IntersectionObserver(entries => {
+// ── METRIC COUNTERS ─────────────────────────────────────────
+const metObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (!e.isIntersecting) return;
     const el = e.target;
-    if (el.dataset.static) return; // static values don't animate
-    const target = parseInt(el.dataset.target);
-    const suffix = el.dataset.suffix || '';
+    const type = el.dataset.type;
+    if (type === 'static') { metObs.unobserve(el); return; }
+    const dur = 1300;
     const start = performance.now();
-    const dur = 1200;
-    function tick(now) {
-      const p = Math.min((now - start) / dur, 1);
-      const ease = 1 - Math.pow(1-p, 3);
-      el.textContent = Math.round(target * ease) + suffix;
-      if (p < 1) requestAnimationFrame(tick);
+    if (type === 'up') {
+      const to = parseInt(el.dataset.to);
+      const suffix = el.dataset.suffix || '';
+      function up(now) {
+        const p = Math.min((now - start) / dur, 1);
+        const ease = 1 - Math.pow(1-p, 3);
+        el.textContent = Math.round(to * ease) + suffix;
+        if (p < 1) requestAnimationFrame(up);
+      }
+      requestAnimationFrame(up);
+    } else if (type === 'down') {
+      const from = parseInt(el.dataset.from);
+      const to = parseInt(el.dataset.to);
+      function dn(now) {
+        const p = Math.min((now - start) / dur, 1);
+        const ease = 1 - Math.pow(1-p, 3);
+        el.textContent = '< ' + Math.round(from - (from - to) * ease) + 's';
+        if (p < 1) requestAnimationFrame(dn);
+      }
+      requestAnimationFrame(dn);
     }
-    requestAnimationFrame(tick);
-    cio.unobserve(el);
+    metObs.unobserve(el);
   });
 }, {threshold: 0.5});
-document.querySelectorAll('.metric-n[data-target]').forEach(el => cio.observe(el));
+document.querySelectorAll('.m-n').forEach(el => metObs.observe(el));
 
-// ── FORM SUBMIT ─────────────────────────────────────────
+// ── FORM SUBMIT ─────────────────────────────────────────────
 const lForm = document.getElementById('lForm');
-const sBox = document.getElementById('sBox');
+const fSuccess = document.getElementById('fSuccess');
 const subBtn = document.getElementById('subBtn');
 const subTxt = document.getElementById('subTxt');
 const subSpin = document.getElementById('subSpin');
 
 lForm.addEventListener('submit', async e => {
   e.preventDefault();
-  const nome    = document.getElementById('fn').value.trim();
-  const clinica = document.getElementById('fc').value.trim();
-  const tel     = document.getElementById('ft').value.trim();
-  const email   = document.getElementById('fe').value.trim();
-  if (!nome || !clinica || !tel || !email) {
-    lForm.querySelectorAll('input').forEach(i => {
-      if (!i.value.trim()) i.style.borderColor = 'rgba(255,100,100,.7)';
-    });
-    return;
-  }
+  const nome   = document.getElementById('fn').value.trim();
+  const clinica= document.getElementById('fc').value.trim();
+  const tel    = document.getElementById('ft').value.trim();
+  const email  = document.getElementById('fe').value.trim();
+  let ok = true;
+  [['fn',nome],['fc',clinica],['ft',tel],['fe',email]].forEach(([id,v]) => {
+    const el = document.getElementById(id);
+    if (!v) { el.classList.add('err'); ok = false; }
+    else el.classList.remove('err');
+  });
+  if (!ok) return;
+
   subBtn.disabled = true;
   subTxt.style.display = 'none';
   subSpin.style.display = 'flex';
+
+  const data = {nome, clinica, telefone: tel, email, ts: new Date().toISOString(), source: 'landing'};
+  console.log('Lead captured:', data);
+
   try {
-    console.log('Lead:', { nome, clinica, telefone: tel, email, ts: new Date().toISOString() });
-    // Replace with real endpoint:
-    // await fetch('https://your-endpoint.com/lead', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nome,clinica,telefone:tel,email}) });
-    await new Promise(r => setTimeout(r, 900)); // simulate network
+    // Replace with real endpoint when available:
+    // await fetch('https://your-endpoint/lead', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    await new Promise(r => setTimeout(r, 900));
   } catch(_) {}
+
   lForm.style.display = 'none';
-  sBox.classList.add('show');
-  sBox.scrollIntoView({behavior:'smooth', block:'center'});
+  fSuccess.classList.add('show');
+  fSuccess.scrollIntoView({behavior:'smooth', block:'center'});
+});
+
+// Clear error on input
+document.querySelectorAll('.fi').forEach(inp => {
+  inp.addEventListener('input', () => inp.classList.remove('err'));
 });
 </script>
 </body>
