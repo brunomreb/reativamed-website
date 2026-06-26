@@ -170,14 +170,14 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
    SOLUTION
 ══════════════════════════════ */
 #solution{}
-.sol-intro{padding:112px 0 24px;background:#fff;text-align:center}
-.sol-intro h2{max-width:700px;margin:0 auto 16px}
-.sol-intro p{max-width:600px;margin:0 auto}
+.sol-intro{padding:48px 0 32px;background:#fff;text-align:left}
+.sol-intro h2{max-width:640px;margin:0 0 16px}
+.sol-intro p{max-width:640px;margin:0}
 /* bands */
 .sol-band{padding:80px 0}
 .sol-band-a{background:#fff}
 .sol-band-b{background:#f0f9fa}
-.sol-band-grid{display:grid;gap:64px;align-items:center}
+.sol-band-grid{display:grid;gap:64px;align-items:flex-start}
 .sol-band-grid.cols55{grid-template-columns:55% 45%}
 .sol-band-grid.cols45{grid-template-columns:45% 55%}
 .motor-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#3999a9;background:rgba(57,153,169,.09);border:1px solid rgba(57,153,169,.22);padding:5px 14px;border-radius:100px;margin-bottom:18px}
@@ -190,13 +190,13 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .motor-bullets li::before{content:'—';color:#3999a9;font-weight:700;flex-shrink:0}
 /* Solution phone (smaller than hero) */
 .sol-phone{display:flex;justify-content:center}
-.iphone-sm{width:min(340px,90%);border-radius:38px;background:#1c1c1e;border:6px solid #2c2c2e;position:relative;overflow:hidden;
+.iphone-sm{width:min(340px,90%);border-radius:38px;background:#1c1c1e;border:6px solid #2c2c2e;position:relative;overflow:visible;
   box-shadow:0 0 0 1px #3a3a3c,0 0 48px rgba(57,153,169,.18),0 32px 64px rgba(0,0,0,.3)}
 .iphone-sm .iphone-notch{width:78px;height:22px;top:10px}
-.iphone-sm .iphone-screen{min-height:520px}
+.iphone-sm .iphone-screen{min-height:560px}
 .iphone-sm .wa-bar{padding-top:42px}
 /* Dashboard mockup */
-.dash-mock{background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:24px;box-shadow:0 2px 16px rgba(57,153,169,.07);max-width:340px;margin:0 auto}
+.dash-mock{background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:24px;box-shadow:0 2px 16px rgba(57,153,169,.07);width:min(420px,100%);margin:0 auto}
 .dash-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .dash-head-t{font-size:12px;font-weight:600;color:#4a6572;text-transform:uppercase;letter-spacing:.06em}
 .dash-live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#3999a9}
@@ -204,8 +204,8 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 @keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(57,153,169,.4)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(57,153,169,0)}}
 .dash-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .ds{padding:14px;background:#f0f9fa;border-radius:8px}
-.ds-n{font-size:26px;font-weight:800;letter-spacing:-.03em;color:#3999a9;line-height:1;margin-bottom:4px}
-.ds-l{font-size:11px;color:#4a6572;line-height:1.4}
+.ds-n{font-size:31px;font-weight:800;letter-spacing:-.03em;color:#3999a9;line-height:1;margin-bottom:4px}
+.ds-l{font-size:13px;color:#4a6572;line-height:1.4}
 .dash-bars-wrap{background:#f8fbfc;border-radius:8px;padding:14px 12px 8px}
 .dash-bars-lbl{font-size:10.5px;color:#94a3b8;margin-bottom:10px}
 .dash-bars{display:flex;align-items:flex-end;gap:5px;height:52px}
@@ -220,11 +220,11 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .how-top h2{max-width:640px}
 .how-top p{margin-top:12px;font-size:17px;font-weight:600;color:#3999a9}
 .timeline{position:relative;padding-left:44px}
-.timeline::before{content:'';position:absolute;left:0;top:6px;bottom:24px;width:2px;background:linear-gradient(180deg,#3999a9 0%,rgba(57,153,169,.12) 100%)}
+.timeline::before{content:'';position:absolute;left:0;top:6px;bottom:24px;width:3px;background:linear-gradient(180deg,#3999a9 0%,rgba(57,153,169,.12) 100%)}
 .tl-item{position:relative;padding-bottom:64px}
 .tl-item:last-child{padding-bottom:0}
-.tl-dot{position:absolute;left:-50px;top:4px;width:16px;height:16px;border-radius:50%;background:#3999a9;border:3px solid #f0f9fa;box-shadow:0 0 0 2px #3999a9}
-.tl-n{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#3999a9;margin-bottom:10px}
+.tl-dot{position:absolute;left:-50px;top:4px;width:12px;height:12px;border-radius:50%;background:#3999a9}
+.tl-n{font-size:13px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#3999a9;margin-bottom:10px}
 .tl-item h3{margin-bottom:10px}
 .tl-item p{max-width:520px}
 .how-bottom{margin-top:64px;padding-left:0;font-size:16px;font-weight:600;color:#3999a9}
@@ -621,7 +621,7 @@ footer{padding:36px 0;background:#060b12;border-top:1px solid rgba(255,255,255,.
             <div class="dash-stats">
               <div class="ds"><div class="ds-n">312</div><div class="ds-l">Conversas este mês</div></div>
               <div class="ds"><div class="ds-n">47</div><div class="ds-l">Consultas marcadas</div></div>
-              <div class="ds"><div class="ds-n" style="font-size:18px">&lt;30s</div><div class="ds-l">Tempo médio resposta</div></div>
+              <div class="ds"><div class="ds-n" style="font-size:22px">&lt;30s</div><div class="ds-l">Tempo médio resposta</div></div>
               <div class="ds"><div class="ds-n">24/7</div><div class="ds-l">Disponibilidade</div></div>
             </div>
             <div class="dash-bars-wrap">
@@ -698,8 +698,8 @@ footer{padding:36px 0;background:#060b12;border-top:1px solid rgba(255,255,255,.
         <div class="m-n" data-type="up" data-to="30" data-suffix="+">30+</div>
         <div class="m-lbl">consultas recuperadas<br>no primeiro mês</div>
       </div>
-      <div class="metric">
-        <div class="m-n" data-type="down" data-from="60" data-to="30"><span style="white-space:nowrap">&lt; 30s</span></div>
+      <div class="metric" style="min-width:160px">
+        <div class="m-n" data-type="down" data-from="60" data-to="30"><span style="white-space:nowrap;display:inline-block">&lt; 30s</span></div>
         <div class="m-lbl">tempo de resposta<br>do assistente IA</div>
       </div>
       <div class="metric">
