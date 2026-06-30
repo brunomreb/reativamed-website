@@ -78,7 +78,7 @@ p{font-size:18px;font-weight:300;line-height:1.7;color:#4a6572}
 .hamburger.open span:nth-child(2){opacity:0}
 .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 /* Mobile overlay */
-#m-overlay{display:none;position:fixed;inset:0;background:#060b12;z-index:190;flex-direction:column;padding:0 32px}
+#m-overlay{display:none;position:fixed;inset:0;background:#060b12;z-index:1200;flex-direction:column;padding:0 32px}
 #m-overlay.open{display:flex}
 .m-ov-top{height:64px;display:flex;align-items:center}
 .m-ov-links{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px}
@@ -320,6 +320,7 @@ footer{padding:36px 0;background:#060b12;border-top:1px solid rgba(255,255,255,.
   .hamburger{display:flex}
   .nav-desktop-btn{display:none}
   .nav-links{display:none}
+  #nav{min-width:unset;width:calc(100% - 32px);padding:10px 16px}
   .hero-grid{grid-template-columns:1fr}
   .hero-phone-wrap{display:none}
   .prob-item{grid-template-columns:64px 1fr}
@@ -1039,14 +1040,26 @@ lForm.addEventListener('submit', async e => {
   subTxt.style.display = 'none';
   subSpin.style.display = 'flex';
 
-  const data = {nome, clinica, telefone: tel, email, ts: new Date().toISOString(), source: 'landing'};
-  console.log('Lead captured:', data);
+  const data = {
+    nome, clinica, telefone: tel, email,
+    _subject: `Novo lead ReativaMED — ${clinica}`,
+    _replyto: email
+  };
 
   try {
-    // Replace with real endpoint when available:
-    // await fetch('https://your-endpoint/lead', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    await new Promise(r => setTimeout(r, 900));
-  } catch(_) {}
+    const res = await fetch('https://formspree.io/f/YOUR_FORMSPREE_ID', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error('submit failed');
+  } catch(_) {
+    subBtn.disabled = false;
+    subTxt.style.display = '';
+    subSpin.style.display = 'none';
+    alert('Ocorreu um erro. Por favor tente novamente ou contacte-nos directamente.');
+    return;
+  }
 
   lForm.style.display = 'none';
   fSuccess.classList.add('show');
